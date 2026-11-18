@@ -1,5 +1,5 @@
 /* ============================================================
-   清茗集 · 交互脚本
+   解茶香 · 交互脚本
    ============================================================ */
 (() => {
   'use strict';
@@ -650,14 +650,14 @@
     const footText = $('.vip-card__foot > span');
     if (footText) footText.textContent = '青瓷会员 · 有效期至 2027.12.31';
 
-    toast('登录成功，欢迎回到清茗集');
+    toast('登录成功，欢迎回到解茶香');
   }
 
   function syncMemberCode() {
     const memberNo = $('#memberNo');
     if (state.loggedIn) {
       const { y, mo, da } = nowParts();
-      memberNo.textContent = `QM · ${y} ${mo}${da} 0${Math.floor(Math.random() * 9) + 1}38`;
+      memberNo.textContent = `JC · ${y} ${mo}${da} 0${Math.floor(Math.random() * 9) + 1}38`;
     } else {
       memberNo.textContent = '登录后生成专属会员码';
     }
