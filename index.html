@@ -338,14 +338,14 @@
 
           <div class="store">
             <div class="store__info">
-              <button class="store__name press" data-toast="已为您定位到最近门店">
+              <button class="store__name press" id="storeSwitchBtn" aria-haspopup="dialog">
                 <svg class="ic store__star"><use href="#i-star"/></svg>
-                南昌万寿宫店
-                <svg class="ic store__chev"><use href="#i-chevron"/></svg>
+                <span id="storeName">八马茶业(石景山古城店)</span>
+                <svg class="ic store__chev"><use href="#i-chevron-down"/></svg>
               </button>
               <p class="store__meta">
                 <svg class="ic"><use href="#i-pin"/></svg>
-                <span>距您520m</span>
+                <span id="storeDistance">距学院 380m</span>
                 <span class="store__open">营业中</span>
               </p>
             </div>
@@ -358,8 +358,8 @@
 
           <div class="store__tags">
             <span class="tag-pill"><b>¥2</b> 领取</span>
-            <button class="store__detail press" data-toast="南昌万寿宫店 · 09:00 - 22:00">门店详细信息</button>
-            <button class="store__more press" data-toast="更多门店信息">
+            <button class="store__detail press" id="storeDetailBtn">门店详细信息</button>
+            <button class="store__more press" id="storeMoreBtn">
               更多 <svg class="ic"><use href="#i-chevron-down"/></svg>
             </button>
           </div>
@@ -594,6 +594,22 @@
         <p class="member-code-tip">请向店员出示此码，积分自动入账</p>
         <p class="member-code-no" id="memberNo">JC · 2026 1118 0138</p>
       </div>
+    </section>
+
+    <!-- 门店切换 -->
+    <section class="sheet sheet--store" id="storeSheet" aria-label="选择门店">
+      <div class="sheet__grab"><i></i></div>
+      <div class="sheet__head">
+        <div>
+          <h3>选择门店</h3>
+          <p class="store-sheet__sub" id="storeSheetSub">北京市石景山区 · 35 家门店</p>
+        </div>
+        <button class="sheet__close press" data-close-sheet><svg class="ic"><use href="#i-close"/></svg></button>
+      </div>
+      <div class="store-regions" id="storeRegions" role="tablist" aria-label="门店区域"></div>
+      <p class="store-regions__note" id="storeRegionNote"></p>
+      <div class="store-list" id="storeList"></div>
+      <p class="store-sheet__tip">到店前建议先致电确认营业时间</p>
     </section>
 
     <!-- 冲泡中 -->

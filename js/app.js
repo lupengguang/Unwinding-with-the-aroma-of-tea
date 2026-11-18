@@ -18,7 +18,8 @@
   const sheets = {
     action: $('#actionSheet'),
     cart: $('#cartSheet'),
-    member: $('#memberSheet')
+    member: $('#memberSheet'),
+    store: $('#storeSheet')
   };
   let current = 'splash';
   let splashTimer = null;
@@ -77,10 +78,61 @@
   const PRODUCT_INDEX = new Map();
   CATEGORIES.forEach(cat => cat.products.forEach(p => PRODUCT_INDEX.set(p.id, { ...p, cat: cat.name })));
 
+  /* ---------------- 门店数据 ---------------- */
+  const STORE_REGIONS = [
+    { id: 'gucheng', name: '古城 & 八角', note: '距学院较近' },
+    { id: 'lugu', name: '鲁谷 & 八宝山', note: '社区商业集中' },
+    { id: 'pingguo', name: '苹果园 & 金顶街', note: '老字号分店' },
+    { id: 'other', name: '其他区域', note: '品牌专营店' }
+  ];
+
+  const STORES = [
+    { id: 'bama-gucheng', region: 'gucheng', name: '八马茶业（石景山古城店）', addr: '石景山区物资总公司底商一层107号', dist: '距学院 380m', tags: ['品牌直营', '距学院近'] },
+    { id: 'bama-lvdi', region: 'gucheng', name: '八马茶业（石景山绿地金融城店）', addr: '古城南街9号院绿地环球文化金融城4号楼1层', dist: '620m', tags: ['品牌直营', '商场店'] },
+    { id: 'xianpai', region: 'gucheng', name: '仙牌灵芝茶（古城大街店）', addr: '古城街道古城大街20号', dist: '760m', tags: ['特色灵芝茶', '社区店'] },
+    { id: 'caomuren', region: 'gucheng', name: '草木人茶艺馆（八角西街店）', addr: '八角西街北口甲17号', dist: '1.1km', tags: ['茶艺馆', '可品茗'] },
+    { id: 'zhiyun', region: 'gucheng', name: '芷韵香茗茶庄', addr: '古城北路8号22号楼', dist: '1.3km', tags: ['私房茶庄', '古城北路'] },
+    { id: 'wuyutai-gubei', region: 'gucheng', name: '吴裕泰（古城北路店）', addr: '首钢古北居民区古城北路5号楼', dist: '1.5km', tags: ['老字号', '茉莉花茶'] },
+    { id: 'wuyutai-bajiao', region: 'gucheng', name: '吴裕泰茶庄（八角店）', addr: '八角南路1号', dist: '1.7km', tags: ['老字号', '距学院较近'] },
+    { id: 'boyunxuan', region: 'gucheng', name: '博韵轩茶庄', addr: '古城北路6号（门牌待核实）', dist: '1.9km', tags: ['茶庄', '门牌待核实'] },
+    { id: 'junyixuan', region: 'gucheng', name: '君怡轩（中国国际出版大厦店）', addr: '石景山古城，新中式大店，主营六大茶类及私人订制', dist: '2.0km', tags: ['新中式茶空间', '私人订制'] },
+    { id: 'xiaochayuan', region: 'gucheng', name: '小茶园', addr: '古城南路48号德义兴商场1层', dist: '2.2km', tags: ['商场店', '平价茶饮'] },
+
+    { id: 'zhangyiyuan-lugu', region: 'lugu', name: '张一元（鲁谷社区店）', addr: '鲁谷南路26号', dist: '2.8km', tags: ['老字号', '社区店'] },
+    { id: 'wuyutai-lugu', region: 'lugu', name: '吴裕泰（溢香雅舍茶庄）', addr: '鲁谷大街东侧永辉超市一层C0109122', dist: '3.1km', tags: ['老字号', '超市店'] },
+    { id: 'qingshan', region: 'lugu', name: '青衫若素茶叶市集', addr: '永辉超市鲁谷店内', dist: '3.2km', tags: ['茶叶市集', '超市内'] },
+    { id: 'dingming', region: 'lugu', name: '鼎茗茶坊（依翠园小区东区店）', addr: '鲁谷南路14号', dist: '2.9km', tags: ['社区茶坊', '依翠园'] },
+    { id: 'banyueyuan', region: 'lugu', name: '伴月苑茶城', addr: '鲁谷街道新岚大厦南侧一层', dist: '3.4km', tags: ['茶城', '多品牌'] },
+
+    { id: 'mingcha', region: 'pingguo', name: '茗茶超市', addr: '苹果园南路甲11号（天宇写字楼）', dist: '4.2km', tags: ['茗茶超市', '写字楼'] },
+    { id: 'fengping', region: 'pingguo', name: '北京峰平剑毫茶叶销售中心', addr: '苹果园南路甲11号3幢4层B10号', dist: '4.3km', tags: ['茶叶批发', '写字楼'] },
+    { id: 'wuyutai-pingguo', region: 'pingguo', name: '吴裕泰（苹果园店）', addr: '石景山区苹果园区域', dist: '4.5km', tags: ['老字号', '苹果园'] },
+    { id: 'wuyutai-shijingshan', region: 'pingguo', name: '吴裕泰（石景山店）', addr: '金顶街街道金顶街第二小学院附近', dist: '4.8km', tags: ['老字号', '金顶街'] },
+    { id: 'zhangyiyuan-jinding', region: 'pingguo', name: '北京金顶街张一元茶庄', addr: '金顶西街红光金鼎市场一层1M009至1A012号', dist: '5.0km', tags: ['老字号', '市场店'] },
+
+    { id: 'dayi', region: 'other', name: '大益茶（石景山当代商城店）', addr: '阜石路165号院2号楼当代商城165-5-6号', dist: '3.6km', tags: ['普洱专营', '商场店'] },
+    { id: 'wuyutai-rongjing', region: 'other', name: '吴裕泰（石景山融景城店）', addr: '京原路19号院2号楼（中储粮油脂大厦旁）', dist: '4.0km', tags: ['老字号', '社区店'] },
+    { id: 'wuyutai-xilongduo', region: 'other', name: '吴裕泰（北京喜隆多新国际店）', addr: '阜石路300号喜隆多新国际购物中心2F西侧254商铺', dist: '4.4km', tags: ['老字号', '商场店'] },
+    { id: 'zhangyiyuan-badachu', region: 'other', name: '张一元茶庄（八大处店）', addr: '香山南路168-61', dist: '5.6km', tags: ['老字号', '八大处'] },
+    { id: 'wuyutai-yangzhuang', region: 'other', name: '吴裕泰茶庄（杨庄店）', addr: '时代花园南路28号院1号楼1层103号', dist: '5.2km', tags: ['老字号', '杨庄'] },
+    { id: 'wuyutai-badachu', region: 'other', name: '北京吴裕泰八大处茶行', addr: '香山南路168号院87号', dist: '5.7km', tags: ['老字号', '八大处'] },
+    { id: 'tenfu-carrefour', region: 'other', name: '天福茗茶（家乐福石景山店）', addr: '石景山路乙18号家乐福内', dist: '3.3km', tags: ['品牌连锁', '家乐福内'] },
+    { id: 'xiaoguancha', region: 'other', name: '小罐茶（北京石景山山姆店）', addr: '阜石路158号山姆会员店内', dist: '3.8km', tags: ['品牌连锁', '山姆店内'] },
+    { id: 'dahuangcha', region: 'other', name: '大荒茶（首钢店）', addr: '群明湖大街6号', dist: '6.1km', tags: ['首钢文创', '茶空间'] },
+    { id: 'mingxiangge', region: 'other', name: '茗香阁茶馆（城通街26号院店）', addr: '城通街26号院4号楼', dist: '4.9km', tags: ['茶馆', '城通街'] },
+    { id: 'charenfang', region: 'other', name: '茶人坊', addr: '古城金融街长安中心26号院附近', dist: '2.4km', tags: ['茶人空间', '长安中心'] },
+    { id: 'yuanxintang', region: 'other', name: '缘心堂茶书院', addr: '古城南街9号院绿地环球文化金融城附近', dist: '2.1km', tags: ['茶书院', '绿地金融城'] },
+    { id: 'chengzhitang', region: 'other', name: '乘之堂茶生活', addr: '石景山区（小红书推荐茶空间）', dist: '3.0km', tags: ['茶生活', '小红书推荐'] },
+    { id: 'minxiongwei', region: 'other', name: '北京市闽雄伟茶叶店', addr: '古城南路36栋26号', dist: '2.6km', tags: ['社区茶店', '古城南路'] },
+    { id: 'jingcheng-tenfu', region: 'other', name: '北京京城天福茶庄有限公司石景山第一分店', addr: '石景山区', dist: '4.6km', tags: ['品牌连锁', '石景山'] }
+  ];
+
   const state = {
     mode: 'takeout',
     cat: 'season',
     search: '',
+    storeId: 'bama-gucheng',
+    storeRegion: 'gucheng',
     cart: new Map(),
     orders: [],
     orderTab: 'all',
@@ -100,6 +152,14 @@
   const searchInput = $('#searchInput');
   const searchClear = $('#searchClear');
   const storeMode = $('#storeMode');
+  const storeSwitchBtn = $('#storeSwitchBtn');
+  const storeNameEl = $('#storeName');
+  const storeDistanceEl = $('#storeDistance');
+  const storeMoreBtn = $('#storeMoreBtn');
+  const storeDetailBtn = $('#storeDetailBtn');
+  const storeRegions = $('#storeRegions');
+  const storeList = $('#storeList');
+  const storeSheetSub = $('#storeSheetSub');
   const cartList = $('#cartList');
   const cartEmpty = $('#cartEmpty');
   const cartFoot = $('#cartFoot');
@@ -475,6 +535,85 @@
     }
   }
 
+  /* ---------------- 门店切换 ---------------- */
+  function selectedStore() {
+    return STORES.find(s => s.id === state.storeId) || STORES[0];
+  }
+
+  function syncStoreHeader() {
+    const s = selectedStore();
+    storeNameEl.textContent = s.name;
+    storeDistanceEl.textContent = s.dist.startsWith('距') ? s.dist : `距学院 ${s.dist}`;
+    storeSwitchBtn.title = s.name;
+  }
+
+  function renderStoreRegions() {
+    storeRegions.innerHTML = STORE_REGIONS.map(region => {
+      const count = STORES.filter(s => s.region === region.id).length;
+      const active = region.id === state.storeRegion;
+      return `
+        <button class="store-region${active ? ' is-active' : ''}" data-region="${region.id}" role="tab" aria-selected="${active}">
+          <span>${region.name}</span><b>${count}</b>
+        </button>`;
+    }).join('');
+    const region = STORE_REGIONS.find(r => r.id === state.storeRegion) || STORE_REGIONS[0];
+    const notes = {
+      gucheng: '品牌茶店与老字号集中，距学院相对较近，选择丰富。',
+      lugu: '社区商业发达，连锁品牌与茶城分布密集。',
+      pingguo: '多个老字号分店与社区茶铺沿街分布。',
+      other: '品牌特色鲜明，含商场店与品牌专营店。'
+    };
+    $('#storeRegionNote').textContent = notes[region.id] || '';
+  }
+
+  function renderStoreList() {
+    const list = STORES.filter(s => s.region === state.storeRegion);
+    storeList.scrollTop = 0;
+    storeList.innerHTML = list.map((s, i) => `
+      <button class="store-item${s.id === state.storeId ? ' is-selected' : ''}" data-store-id="${s.id}" style="--i:${i}">
+        <span class="store-item__pin"><svg class="ic"><use href="#i-pin"/></svg></span>
+        <span class="store-item__body">
+          <span class="store-item__name">${s.name}</span>
+          <span class="store-item__addr">${s.addr}</span>
+          <span class="store-item__tags">${s.tags.map(t => `<span class="store-item__tag${t.includes('学院') ? ' store-item__tag--near' : ''}">${t}</span>`).join('')}</span>
+        </span>
+        <span class="store-item__side">
+          <span class="store-item__dist">${s.dist}</span>
+          <span class="store-item__check"><svg class="ic"><use href="#i-check"/></svg></span>
+        </span>
+      </button>
+    `).join('');
+  }
+
+  function renderStoreSheet() {
+    renderStoreRegions();
+    renderStoreList();
+    storeSheetSub.textContent = `北京市石景山区 · ${STORES.length} 家门店`;
+  }
+
+  function selectStore(id) {
+    const store = STORES.find(s => s.id === id);
+    if (!store) return;
+    state.storeId = id;
+    state.storeRegion = store.region;
+    syncStoreHeader();
+
+    storeSwitchBtn.classList.remove('is-switch');
+    void storeSwitchBtn.offsetWidth;
+    storeSwitchBtn.classList.add('is-switch');
+    setTimeout(() => storeSwitchBtn.classList.remove('is-switch'), 620);
+
+    const picked = storeList.querySelector(`[data-store-id="${id}"]`);
+    if (picked) {
+      $$('.store-item', storeList).forEach(el => el.classList.toggle('is-selected', el === picked));
+      picked.classList.add('is-picked');
+      setTimeout(() => picked.classList.remove('is-picked'), 520);
+    }
+
+    toast(`已切换至 ${store.name}`);
+    setTimeout(closeSheets, 360);
+  }
+
   /* ---------------- 弹层 ---------------- */
   function openSheet(name) {
     const sheet = sheets[name];
@@ -483,6 +622,10 @@
     backdrop.classList.add('is-open');
     if (name === 'cart') renderCart();
     if (name === 'member') syncMemberCode();
+    if (name === 'store') {
+      state.storeRegion = selectedStore().region;
+      renderStoreSheet();
+    }
     sheet.style.transform = '';
   }
   function closeSheets() {
@@ -894,6 +1037,24 @@
     $$('.segmented__btn').forEach(btn => {
       btn.addEventListener('click', () => setMode(btn.dataset.storeMode));
     });
+
+    // 门店切换
+    storeSwitchBtn.addEventListener('click', () => openSheet('store'));
+    storeMoreBtn.addEventListener('click', () => openSheet('store'));
+    storeDetailBtn.addEventListener('click', () => {
+      toast(`${selectedStore().name} · 09:00 - 22:00 · 营业中`);
+    });
+    storeRegions.addEventListener('click', e => {
+      const chip = e.target.closest('[data-region]');
+      if (!chip || chip.dataset.region === state.storeRegion) return;
+      state.storeRegion = chip.dataset.region;
+      renderStoreRegions();
+      renderStoreList();
+    });
+    storeList.addEventListener('click', e => {
+      const item = e.target.closest('[data-store-id]');
+      if (item) selectStore(item.dataset.storeId);
+    });
     menuList.addEventListener('scroll', () => {
       menuHead.classList.toggle('is-scrolled', menuList.scrollTop > 6);
     }, { passive: true });
@@ -983,6 +1144,7 @@
     renderProducts();
     renderOrders();
     updateModeUI();
+    syncStoreHeader();
     updateTabs();
     updateCartUI();
     buildQR();
