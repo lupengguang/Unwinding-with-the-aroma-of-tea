@@ -847,15 +847,53 @@
     <!-- 收货地址 -->
     <section class="sheet sheet--addr" id="addressSheet" aria-label="选择收货地址">
       <div class="sheet__grab"><i></i></div>
-      <div class="sheet__head">
-        <div>
-          <h3>选择收货地址</h3>
-          <p class="sheet__sub">配送范围 · 门店三公里内</p>
+
+      <!-- 地址列表视图 -->
+      <div class="addr-view" id="addrListView">
+        <div class="sheet__head">
+          <div>
+            <h3>选择收货地址</h3>
+            <p class="sheet__sub">配送范围 · 门店三公里内</p>
+          </div>
+          <button class="sheet__close press" data-close-sheet><svg class="ic"><use href="#i-close"/></svg></button>
         </div>
-        <button class="sheet__close press" data-close-sheet><svg class="ic"><use href="#i-close"/></svg></button>
+        <div class="addr-list" id="addrList"></div>
+        <button class="sheet__ghost press" id="addrAddBtn">＋ 新增收货地址</button>
       </div>
-      <div class="addr-list" id="addrList"></div>
-      <button class="sheet__ghost press" data-toast="新增地址功能即将上线">＋ 新增收货地址</button>
+
+      <!-- 新增地址视图 -->
+      <div class="addr-view" id="addrFormView" hidden>
+        <div class="sheet__head">
+          <button class="addr-back press" id="addrFormBack" aria-label="返回地址列表"><svg class="ic"><use href="#i-chevron"/></svg></button>
+          <div class="addr-form__title">
+            <h3>新增收货地址</h3>
+            <p class="sheet__sub">保存后自动设为当前地址</p>
+          </div>
+          <button class="sheet__close press" data-close-sheet><svg class="ic"><use href="#i-close"/></svg></button>
+        </div>
+        <form class="addr-form" id="addrForm" novalidate>
+          <div class="addr-form__tags" id="addrFormTags" role="group" aria-label="地址标签">
+            <button type="button" class="addr-tag is-active" data-tag="家">家</button>
+            <button type="button" class="addr-tag" data-tag="公司">公司</button>
+            <button type="button" class="addr-tag" data-tag="学校">学校</button>
+            <button type="button" class="addr-tag" data-tag="其他">其他</button>
+          </div>
+          <label class="addr-field">
+            <span>收货地址</span>
+            <input id="addrInputAddr" type="text" placeholder="街道、小区、楼栋与门牌号" maxlength="60" autocomplete="off">
+          </label>
+          <label class="addr-field">
+            <span>联系人</span>
+            <input id="addrInputName" type="text" placeholder="收货人姓名" maxlength="12" autocomplete="off">
+          </label>
+          <label class="addr-field">
+            <span>手机号</span>
+            <input id="addrInputPhone" type="tel" placeholder="11 位手机号码" maxlength="11" inputmode="numeric" autocomplete="off">
+          </label>
+          <p class="addr-form__error" id="addrFormError" hidden></p>
+          <button class="delivery-submit press" type="submit" id="addrFormSave">保存并使用</button>
+        </form>
+      </div>
     </section>
 
     <!-- 外卖下单确认 -->

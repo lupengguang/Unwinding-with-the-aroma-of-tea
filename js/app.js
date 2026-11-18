@@ -217,6 +217,14 @@
   const feeDelivery = $('#feeDelivery');
   const feeOff = $('#feeOff');
   const addrList = $('#addrList');
+  const addrListView = $('#addrListView');
+  const addrFormView = $('#addrFormView');
+  const addrForm = $('#addrForm');
+  const addrFormTags = $('#addrFormTags');
+  const addrInputAddr = $('#addrInputAddr');
+  const addrInputName = $('#addrInputName');
+  const addrInputPhone = $('#addrInputPhone');
+  const addrFormError = $('#addrFormError');
 
   /* ---------------- 通用 ---------------- */
   let toastTimer = null;
@@ -683,11 +691,58 @@
   function renderAddressSheet() {
     addrList.innerHTML = ADDRESSES.map(a => `
       <button class="addr-item${a.id === state.addressId ? ' is-active' : ''}" data-addr="${a.id}">
-        <span class="addr-item__tag">${a.tag}</span>
-        <span class="addr-item__body"><b>${a.addr}</b><small>${a.contact} · ${a.dist}</small></span>
+        <span class="addr-item__tag">${escapeHtml(a.tag)}</span>
+        <span class="addr-item__body"><b>${escapeHtml(a.addr)}</b><small>${escapeHtml(a.contact)} · ${escapeHtml(a.dist)}</small></span>
         <span class="addr-item__check"><svg class="ic"><use href="#i-check"/></svg></span>
       </button>
     `).join('');
+  }
+
+  /* 地址弹层：列表视图 / 新增表单视图 */
+  function showAddrView(view) {
+    const isForm = view === 'form';
+    addrListView.hidden = isForm;
+    addrFormView.hidden = !isForm;
+    if (isForm) {
+      addrForm.reset();
+      addrFormError.hidden = true;
+      $$('.addr-tag', addrFormTags).forEach(btn => {
+        btn.classList.toggle('is-active', btn.dataset.tag === '家');
+      });
+    }
+  }
+
+  function addrFormTag() {
+    const active = $('.addr-tag.is-active', addrFormTags);
+    return active ? active.dataset.tag : '家';
+  }
+
+  function submitAddress() {
+    const addr = addrInputAddr.value.trim();
+    const name = addrInputName.value.trim();
+    const phoneNo = addrInputPhone.value.trim();
+    let error = '';
+    if (!addr) error = '请填写收货地址';
+    else if (!name) error = '请填写联系人姓名';
+    else if (!/^1\d{10}$/.test(phoneNo)) error = '请填写 11 位手机号码';
+    if (error) {
+      addrFormError.textContent = error;
+      addrFormError.hidden = false;
+      return;
+    }
+    const id = `addr-${Date.now()}`;
+    ADDRESSES.push({
+      id,
+      tag: addrFormTag(),
+      addr,
+      contact: `${name} ${phoneNo}`,
+      dist: `距门店 ${(0.8 + Math.random() * 2).toFixed(1)}km`
+    });
+    state.addressId = id;
+    renderAddressSheet();
+    syncDeliveryAddress();
+    showAddrView('list');
+    toast('新地址已保存并使用');
   }
 
   function renderDeliverySheet() {
@@ -700,7 +755,7 @@
 
     deliverySheetAddr.innerHTML = `
       <svg class="ic"><use href="#i-pin"/></svg>
-      <div><b>配送到${a.tag}</b><p>${a.addr}<br>${a.contact}</p></div>
+      <div><b>配送到${escapeHtml(a.tag)}</b><p>${escapeHtml(a.addr)}<br>${escapeHtml(a.contact)}</p></div>
     `;
     deliveryItems.innerHTML = entries.map(item => `
       <div class="d-item">
@@ -900,7 +955,10 @@
     backdrop.classList.add('is-open');
     if (name === 'cart') renderCart();
     if (name === 'member') syncMemberCode();
-    if (name === 'address') renderAddressSheet();
+    if (name === 'address') {
+      renderAddressSheet();
+      showAddrView('list');
+    }
     if (name === 'delivery') renderDeliverySheet();
     if (name === 'store') {
       state.storeRegion = selectedStore().region;
@@ -1399,6 +1457,18 @@
       syncEta();
     });
     $('#addrCard').addEventListener('click', () => openSheet('address'));
+    $('#addrAddBtn').addEventListener('click', () => showAddrView('form'));
+    $('#addrFormBack').addEventListener('click', () => showAddrView('list'));
+    addrFormTags.addEventListener('click', e => {
+      const btn = e.target.closest('[data-tag]');
+      if (!btn) return;
+      $$('.addr-tag', addrFormTags).forEach(el => el.classList.toggle('is-active', el === btn));
+    });
+    addrForm.addEventListener('submit', e => {
+      e.preventDefault();
+      submitAddress();
+    });
+    addrForm.addEventListener('input', () => { addrFormError.hidden = true; });
     addrList.addEventListener('click', e => {
       const btn = e.target.closest('[data-addr]');
       if (!btn) return;
