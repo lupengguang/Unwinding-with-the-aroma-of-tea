@@ -12,14 +12,19 @@
     home: $('#screen-home'),
     menu: $('#screen-menu'),
     orders: $('#screen-orders'),
-    profile: $('#screen-profile')
+    profile: $('#screen-profile'),
+    login: $('#screen-login'),
+    register: $('#screen-register'),
+    delivery: $('#screen-delivery')
   };
   const TAB_ORDER = ['home', 'menu', 'orders', 'profile'];
   const sheets = {
     action: $('#actionSheet'),
     cart: $('#cartSheet'),
     member: $('#memberSheet'),
-    store: $('#storeSheet')
+    store: $('#storeSheet'),
+    address: $('#addressSheet'),
+    delivery: $('#deliverySheet')
   };
   let current = 'splash';
   let splashTimer = null;
@@ -137,7 +142,11 @@
     cart: new Map(),
     orders: [],
     orderTab: 'all',
-    loggedIn: false
+    loggedIn: false,
+    deliveryCat: 'all',
+    deliveryEta: 'asap',
+    deliveryFrom: 'home',
+    addressId: 'home'
   };
 
   /* ---------------- 元素 ---------------- */
@@ -188,6 +197,27 @@
   const heroBig = $('.hero__big');
   const promoCard = $('#promoCard');
 
+  const deliveryCats = $('#deliveryCats');
+  const deliveryGrid = $('#deliveryGrid');
+  const deliveryBar = $('#deliveryBar');
+  const deliveryCount = $('#deliveryCount');
+  const deliveryTotal = $('#deliveryTotal');
+  const addrTag = $('#addrTag');
+  const addrText = $('#addrText');
+  const addrMeta = $('#addrMeta');
+  const etaText = $('#etaText');
+  const etaChips = $('#etaChips');
+  const deliveryPromoText = $('#deliveryPromoText');
+  const deliveryProgress = $('#deliveryProgress');
+  const deliveryItems = $('#deliveryItems');
+  const deliverySheetAddr = $('#deliverySheetAddr');
+  const deliverySheetSub = $('#deliverySheetSub');
+  const deliverySheetTotal = $('#deliverySheetTotal');
+  const feeSubtotal = $('#feeSubtotal');
+  const feeDelivery = $('#feeDelivery');
+  const feeOff = $('#feeOff');
+  const addrList = $('#addrList');
+
   /* ---------------- 通用 ---------------- */
   let toastTimer = null;
   function toast(msg) {
@@ -220,9 +250,14 @@
     if (!screenEl[name] || name === current) return;
     const fromEl = screenEl[current];
     const toEl = screenEl[name];
-    const fromIndex = TAB_ORDER.indexOf(current);
-    const toIndex = TAB_ORDER.indexOf(name);
-    const forward = toIndex > fromIndex;
+    const routeRank = n => {
+      if (n === 'login') return TAB_ORDER.length;
+      if (n === 'register') return TAB_ORDER.length + 1;
+      if (n === 'delivery') return TAB_ORDER.length + 2;
+      const i = TAB_ORDER.indexOf(n);
+      return i === -1 ? 0 : i;
+    };
+    const forward = routeRank(name) > routeRank(current);
     const fromSplash = current === 'splash';
     const toSplash = name === 'splash';
 
@@ -288,6 +323,15 @@
       toEl.style.zIndex = '';
       try { inAnim.cancel(); } catch (e) {}
     };
+
+    if (name === 'login' || name === 'register' || name === 'delivery') {
+      const sc = $(`[data-scroll="${name}"]`);
+      if (sc) sc.scrollTop = 0;
+      if (name === 'login' || name === 'register') {
+        const err = name === 'login' ? $('#loginError') : $('#registerError');
+        if (err) err.classList.remove('is-show');
+      }
+    }
 
     phone.dataset.view = name;
     current = name;
@@ -423,7 +467,7 @@
     return getEntries().reduce((sum, item) => sum + item.price * item.qty, 0);
   }
 
-  function addToCart(id, btn) {
+  function addToCart(id, btn, flyTarget) {
     const p = PRODUCT_INDEX.get(id);
     if (!p) return;
     state.cart.set(id, (state.cart.get(id) || 0) + 1);
@@ -431,7 +475,7 @@
     if (btn) {
       btn.classList.add('is-added');
       setTimeout(() => btn.classList.remove('is-added'), 430);
-      flyToCart(btn);
+      flyToCart(btn, flyTarget);
     }
     toast(`${p.name} 已加入茶篮`);
   }
@@ -460,6 +504,8 @@
     cartFoot.hidden = count === 0;
     cartEmpty.hidden = count > 0;
     clearCartBtn.hidden = count === 0;
+
+    renderDeliveryBar();
   }
 
   function renderCart() {
@@ -484,12 +530,12 @@
     updateCartUI();
   }
 
-  function flyToCart(btn) {
+  function flyToCart(btn, targetEl) {
     if (!btn) return;
     const b = btn.getBoundingClientRect();
-    const target = (cartBar.classList.contains('is-show')
+    const target = targetEl || ((cartBar.classList.contains('is-show')
       ? $('#openCart')
-      : $('.tab__plus')) || phone;
+      : $('.tab__plus')) || phone);
     const t = target.getBoundingClientRect();
     const sx = b.left + b.width / 2 - 5.5;
     const sy = b.top + b.height / 2 - 5.5;
@@ -520,6 +566,172 @@
         );
       }
     };
+  }
+
+  /* ---------------- 外卖 ---------------- */
+  const ADDRESSES = [
+    { id: 'home', tag: '家', addr: '北京市石景山区古城南街 9 号院 3 号楼 502', contact: '清茶茶友 138****8866', dist: '距门店 1.8km' },
+    { id: 'office', tag: '公司', addr: '北京市石景山区鲁谷路 74 号院 2 号楼 1106', contact: '清茶茶友 138****8866', dist: '距门店 2.6km' }
+  ];
+  const ETA_MINUTES = { asap: 32, '45': 45, '60': 60 };
+  const FREE_DELIVERY_LIMIT = 39;
+  const DELIVERY_FEE = 3;
+  const PACK_FEE = 1;
+  const NEW_USER_OFF = 3;
+
+  function selectedAddress() {
+    return ADDRESSES.find(a => a.id === state.addressId) || ADDRESSES[0];
+  }
+
+  function deliveryFee() {
+    const sub = getCartTotal();
+    return sub === 0 || sub >= FREE_DELIVERY_LIMIT ? 0 : DELIVERY_FEE;
+  }
+  function deliveryPack() {
+    return getEntries().length ? PACK_FEE : 0;
+  }
+  function deliveryOff() {
+    return getEntries().length ? NEW_USER_OFF : 0;
+  }
+  function deliveryPayable() {
+    return Math.max(0, getCartTotal() + deliveryFee() + deliveryPack() - deliveryOff());
+  }
+
+  function deliveryProducts() {
+    const list = [];
+    CATEGORIES.forEach(cat => {
+      if (state.deliveryCat !== 'all' && state.deliveryCat !== cat.id) return;
+      cat.products.forEach(p => list.push({ ...p, cat: cat.name }));
+    });
+    return list;
+  }
+
+  function updateDeliveryBadges() {
+    $$('[data-dadd]', deliveryGrid).forEach(btn => {
+      btn.dataset.qty = String(state.cart.get(btn.dataset.dadd) || 0);
+    });
+  }
+
+  function renderDeliveryCats() {
+    const items = [{ id: 'all', name: '全部' }, ...CATEGORIES.map(c => ({ id: c.id, name: c.name }))];
+    deliveryCats.innerHTML = items.map(c => `
+      <button class="dcat${c.id === state.deliveryCat ? ' is-active' : ''}" data-dcat="${c.id}" role="tab" aria-selected="${c.id === state.deliveryCat}">${c.name}</button>
+    `).join('');
+  }
+
+  function renderDeliveryGrid() {
+    const badges = ['热销', '', '新品', '', '推荐', '', '人气', ''];
+    const list = deliveryProducts();
+    deliveryGrid.innerHTML = list.map((p, i) => {
+      const badge = badges[i % badges.length];
+      const art = p.cat === '清润冷萃' || p.cat === '鲜果调茶' ? 'art-top-cup' : 'art-teapot';
+      return `
+        <article class="d-card" style="--d:${Math.min(i, 10) * 45}ms">
+          <div class="d-card__art">
+            <svg viewBox="0 0 120 120" aria-hidden="true"><use href="#${art}"/></svg>
+            ${badge ? `<span class="d-card__badge">${badge}</span>` : ''}
+          </div>
+          <h4>${p.name}</h4>
+          <p>${p.desc}</p>
+          <div class="d-card__foot">
+            <span class="d-card__price">${p.price}</span>
+            <button class="d-card__add press" data-dadd="${p.id}" data-qty="${state.cart.get(p.id) || 0}" aria-label="将 ${p.name} 加入茶篮">
+              <svg class="ic"><use href="#i-plus"/></svg>
+            </button>
+          </div>
+        </article>`;
+    }).join('');
+    updateDeliveryBadges();
+  }
+
+  function updateDeliveryPromo() {
+    const sub = getCartTotal();
+    const remain = Math.max(0, FREE_DELIVERY_LIMIT - sub);
+    deliveryPromoText.textContent = remain > 0
+      ? `再买 ¥${remain} 免配送费 · 新客立减 ¥3`
+      : '已享免配送费 · 新客立减 ¥3';
+    deliveryProgress.style.width = `${Math.min(100, (sub / FREE_DELIVERY_LIMIT) * 100)}%`;
+  }
+
+  function renderDeliveryBar() {
+    const count = cartCount();
+    deliveryCount.textContent = count > 99 ? '99+' : String(count);
+    deliveryTotal.textContent = `¥${deliveryPayable()}`;
+    const show = count > 0 && current === 'delivery';
+    deliveryBar.classList.toggle('is-show', show);
+    deliveryBar.setAttribute('aria-hidden', show ? 'false' : 'true');
+    updateDeliveryBadges();
+    updateDeliveryPromo();
+  }
+
+  function syncDeliveryAddress() {
+    const a = selectedAddress();
+    addrTag.textContent = a.tag;
+    addrText.textContent = a.addr;
+    addrMeta.textContent = `${a.contact} · ${a.dist}`;
+  }
+
+  function syncEta() {
+    const minutes = ETA_MINUTES[state.deliveryEta] || 32;
+    etaText.textContent = `${minutes} 分钟`;
+    $$('button', etaChips).forEach(btn => {
+      btn.classList.toggle('is-active', btn.dataset.eta === state.deliveryEta);
+    });
+    deliverySheetSub.textContent = `配送到${selectedAddress().tag} · 预计 ${minutes} 分钟`;
+  }
+
+  function renderAddressSheet() {
+    addrList.innerHTML = ADDRESSES.map(a => `
+      <button class="addr-item${a.id === state.addressId ? ' is-active' : ''}" data-addr="${a.id}">
+        <span class="addr-item__tag">${a.tag}</span>
+        <span class="addr-item__body"><b>${a.addr}</b><small>${a.contact} · ${a.dist}</small></span>
+        <span class="addr-item__check"><svg class="ic"><use href="#i-check"/></svg></span>
+      </button>
+    `).join('');
+  }
+
+  function renderDeliverySheet() {
+    const entries = getEntries();
+    const sub = getCartTotal();
+    const fee = deliveryFee();
+    const pack = deliveryPack();
+    const off = deliveryOff();
+    const a = selectedAddress();
+
+    deliverySheetAddr.innerHTML = `
+      <svg class="ic"><use href="#i-pin"/></svg>
+      <div><b>配送到${a.tag}</b><p>${a.addr}<br>${a.contact}</p></div>
+    `;
+    deliveryItems.innerHTML = entries.map(item => `
+      <div class="d-item">
+        <span>${item.name}<small>×${item.qty}</small></span>
+        <b>¥${item.price * item.qty}</b>
+      </div>
+    `).join('');
+    feeSubtotal.textContent = `¥${sub}`;
+    feeDelivery.textContent = fee === 0 ? '免配送费' : `¥${fee}`;
+    feeOff.textContent = off ? `-¥${off}` : '¥0';
+    deliverySheetTotal.textContent = `¥${Math.max(0, sub + fee + pack - off)}`;
+    deliverySheetSub.textContent = `配送到${a.tag} · 预计 ${ETA_MINUTES[state.deliveryEta]} 分钟`;
+  }
+
+  function openDelivery(from) {
+    state.mode = 'delivery';
+    updateModeUI();
+    state.deliveryFrom = from || (current === 'delivery' ? state.deliveryFrom : current);
+    state.deliveryCat = 'all';
+    state.deliveryEta = 'asap';
+    renderDeliveryCats();
+    renderDeliveryGrid();
+    syncDeliveryAddress();
+    syncEta();
+    updateDeliveryPromo();
+    go('delivery');
+    renderDeliveryBar();
+  }
+
+  function closeDelivery() {
+    go(state.deliveryFrom === 'menu' ? 'menu' : 'home');
   }
 
   /* ---------------- 取餐方式 ---------------- */
@@ -672,10 +884,24 @@
   function openSheet(name) {
     const sheet = sheets[name];
     if (!sheet) return;
-    Object.entries(sheets).forEach(([key, el]) => el.classList.toggle('is-open', key === name));
+    Object.entries(sheets).forEach(([key, el]) => {
+      if (key === name) {
+        el.classList.add('is-open');
+        return;
+      }
+      if (!el.classList.contains('is-open')) return;
+      /* 其他弹层立即收起，避免切换过程中两个弹层同时可见 */
+      el.style.transition = 'none';
+      el.classList.remove('is-open');
+      void el.offsetWidth;
+      el.style.transition = '';
+      el.style.transform = '';
+    });
     backdrop.classList.add('is-open');
     if (name === 'cart') renderCart();
     if (name === 'member') syncMemberCode();
+    if (name === 'address') renderAddressSheet();
+    if (name === 'delivery') renderDeliverySheet();
     if (name === 'store') {
       state.storeRegion = selectedStore().region;
       state.storeQuery = '';
@@ -706,14 +932,14 @@
     return state.mode === 'takeout' ? '门店自取' : '配送到家';
   }
 
-  function createOrder(entries) {
+  function createOrder(entries, totalOverride = null) {
     const { hh, mm, y, mo, da } = nowParts();
     const mins = String(Math.floor(Math.random() * 90));
     const order = {
       id: Date.now(),
       no: `QM ${y}${mo}${da} ${hh}${mm}${mins}`,
       items: entries.map(e => ({ id: e.id, name: e.name, price: e.price, qty: e.qty })),
-      total: entries.reduce((s, e) => s + e.price * e.qty, 0),
+      total: totalOverride == null ? entries.reduce((s, e) => s + e.price * e.qty, 0) : totalOverride,
       mode: modeLabel(),
       time: `今日 ${hh}:${mm}`,
       type: 'store',
@@ -739,11 +965,13 @@
       </div>
     `).join('');
     const ready = order.status === 'ready';
+    const isDelivery = order.mode === '配送到家';
+    const statusText = isDelivery ? (ready ? '配送中' : '备茶中') : (ready ? '待取茶' : '制作中');
     return `
       <article class="order-card">
         <div class="order-card__head">
           <span class="order-card__no">${order.no}</span>
-          <span class="order-card__status ${ready ? 'is-ready' : ''}">${ready ? '待取茶' : '制作中'}</span>
+          <span class="order-card__status ${ready ? 'is-ready' : ''}">${statusText}</span>
         </div>
         <div class="order-card__items">${lines}</div>
         <div class="order-card__foot">
@@ -782,7 +1010,7 @@
 
   /* ---------------- 结算流程 ---------------- */
   let busy = false;
-  function checkout() {
+  function checkout(totalOverride = null) {
     if (busy) return;
     const entries = getEntries();
     if (!entries.length) {
@@ -797,7 +1025,7 @@
     setTimeout(() => {
       brewLayer.classList.remove('is-open');
       brewLayer.setAttribute('aria-hidden', 'true');
-      const order = createOrder(entries);
+      const order = createOrder(entries, totalOverride);
       successNo.textContent = order.no;
       successLayer.classList.add('is-open');
       successLayer.setAttribute('aria-hidden', 'false');
@@ -835,8 +1063,15 @@
       openSheet('member');
       return;
     }
+    go('login');
+  }
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function applyLoginState(name) {
     state.loggedIn = true;
-    greetingLine.innerHTML = 'Hi，<em>青瓷会员</em>，歡迎你';
+    const displayName = (name || '').trim() || '青瓷会员';
+    greetingLine.innerHTML = `Hi，<em>${escapeHtml(displayName)}</em>，歡迎你`;
     loginTip.textContent = '本月已品 6 盏好茶 · 会员日每月 8 号';
     loginBtn.textContent = '会员码';
     loginBtn.classList.add('is-on');
@@ -850,7 +1085,86 @@
     const footText = $('.vip-card__foot > span');
     if (footText) footText.textContent = '青瓷会员 · 有效期至 2027.12.31';
 
+    go('home');
     toast('登录成功，欢迎回到解茶香');
+  }
+
+  function setAuthError(errorEl, msg, inputEl) {
+    errorEl.textContent = msg;
+    errorEl.classList.add('is-show');
+    if (inputEl) {
+      inputEl.classList.add('is-error');
+      inputEl.focus();
+    }
+  }
+
+  function clearAuthError(errorEl, form) {
+    errorEl.classList.remove('is-show');
+    if (!form) return;
+    $$('.auth-input.is-error', form).forEach(input => input.classList.remove('is-error'));
+  }
+
+  function submitLogin() {
+    const form = $('#loginForm');
+    const errorEl = $('#loginError');
+    const btn = $('.auth-submit', form);
+    if (btn.classList.contains('is-busy')) return;
+    clearAuthError(errorEl, form);
+
+    const email = $('#loginEmail').value.trim();
+    const password = $('#loginPassword').value;
+    if (!email) return setAuthError(errorEl, '请输入 E-mail 帐号', $('#loginEmail'));
+    if (!EMAIL_RE.test(email)) return setAuthError(errorEl, 'E-mail 格式好像不太对', $('#loginEmail'));
+    if (!password) return setAuthError(errorEl, '请输入登录密码', $('#loginPassword'));
+    if (password.length < 6) return setAuthError(errorEl, '密码至少 6 位字符', $('#loginPassword'));
+
+    btn.classList.add('is-busy');
+    btn.textContent = '登录中';
+    setTimeout(() => {
+      btn.classList.remove('is-busy');
+      btn.textContent = '登录';
+      $('#loginPassword').value = '';
+      if (current === 'login') applyLoginState('青瓷会员');
+    }, 520);
+  }
+
+  function submitRegister() {
+    const form = $('#registerForm');
+    const errorEl = $('#registerError');
+    const btn = $('.auth-submit', form);
+    if (btn.classList.contains('is-busy')) return;
+    clearAuthError(errorEl, form);
+
+    const name = $('#regName').value.trim();
+    const email = $('#regEmail').value.trim();
+    const password = $('#regPassword').value;
+    const confirm = $('#regConfirm').value;
+    if (!name) return setAuthError(errorEl, '请先取一个茶名', $('#regName'));
+    if (!email) return setAuthError(errorEl, '请输入 E-mail 帐号', $('#regEmail'));
+    if (!EMAIL_RE.test(email)) return setAuthError(errorEl, 'E-mail 格式好像不太对', $('#regEmail'));
+    if (password.length < 6) return setAuthError(errorEl, '密码至少 6 位字符', $('#regPassword'));
+    if (confirm !== password) return setAuthError(errorEl, '两次输入的密码不一致', $('#regConfirm'));
+    if (!$('#regAgree').checked) return setAuthError(errorEl, '请先阅读并同意用户协议', null);
+
+    btn.classList.add('is-busy');
+    btn.textContent = '注册中';
+    setTimeout(() => {
+      btn.classList.remove('is-busy');
+      btn.textContent = '注册并登录';
+      form.reset();
+      if (current === 'register') applyLoginState(name);
+    }, 620);
+  }
+
+  let thirdBusy = false;
+  function thirdPartyLogin(kind) {
+    if (thirdBusy) return;
+    thirdBusy = true;
+    toast(`正在唤起${kind}授权…`);
+    setTimeout(() => {
+      thirdBusy = false;
+      if (current === 'login') applyLoginState(kind === '微信' ? '微信茶友' : '手机茶友');
+    }, 900);
   }
 
   function syncMemberCode() {
@@ -1053,9 +1367,64 @@
     // 首页
     $$('.mode').forEach(btn => {
       btn.addEventListener('click', () => {
+        if (btn.dataset.mode === 'delivery') {
+          openDelivery('home');
+          return;
+        }
         setMode(btn.dataset.mode);
         setTimeout(() => go('menu'), 260);
       });
+    });
+
+    // 外卖
+    $('#deliveryBack').addEventListener('click', closeDelivery);
+    deliveryCats.addEventListener('click', e => {
+      const btn = e.target.closest('[data-dcat]');
+      if (!btn || btn.dataset.dcat === state.deliveryCat) return;
+      state.deliveryCat = btn.dataset.dcat;
+      renderDeliveryCats();
+      renderDeliveryGrid();
+      deliveryGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    deliveryGrid.addEventListener('click', e => {
+      const btn = e.target.closest('[data-dadd]');
+      if (!btn) return;
+      addToCart(btn.dataset.dadd, btn, $('#deliveryCartBtn'));
+      updateDeliveryBadges();
+    });
+    etaChips.addEventListener('click', e => {
+      const btn = e.target.closest('[data-eta]');
+      if (!btn || btn.dataset.eta === state.deliveryEta) return;
+      state.deliveryEta = btn.dataset.eta;
+      syncEta();
+    });
+    $('#addrCard').addEventListener('click', () => openSheet('address'));
+    addrList.addEventListener('click', e => {
+      const btn = e.target.closest('[data-addr]');
+      if (!btn) return;
+      state.addressId = btn.dataset.addr;
+      renderAddressSheet();
+      syncDeliveryAddress();
+      closeSheets();
+      toast(`已切换至${selectedAddress().tag} · ${selectedAddress().dist}`);
+    });
+    $('#deliveryCheckout').addEventListener('click', () => {
+      if (cartCount() === 0) return;
+      openSheet('delivery');
+    });
+    $('#deliveryCartBtn').addEventListener('click', () => {
+      if (cartCount() === 0) {
+        toast('先挑一杯喜欢的茶');
+        return;
+      }
+      openSheet('delivery');
+    });
+    $('#deliverySubmit').addEventListener('click', () => {
+      if (cartCount() === 0) {
+        closeSheets();
+        return;
+      }
+      checkout(deliveryPayable());
     });
 
     // 种类
@@ -1092,7 +1461,13 @@
       }
     });
     $$('.segmented__btn').forEach(btn => {
-      btn.addEventListener('click', () => setMode(btn.dataset.storeMode));
+      btn.addEventListener('click', () => {
+        if (btn.dataset.storeMode === 'delivery') {
+          openDelivery('menu');
+          return;
+        }
+        setMode(btn.dataset.storeMode);
+      });
     });
 
     // 门店切换
@@ -1152,7 +1527,7 @@
       renderCart();
       toast('茶篮已清空');
     });
-    checkoutBtn.addEventListener('click', checkout);
+    checkoutBtn.addEventListener('click', () => checkout());
 
     // 订单
     orderTabs.addEventListener('click', e => {
@@ -1202,6 +1577,52 @@
         toast(messages[key] || '敬请期待');
       });
     });
+
+    // 登录 / 注册
+    $('#loginBack').addEventListener('click', () => go('profile'));
+    $('#registerBack').addEventListener('click', () => go('login'));
+    $('#toRegister').addEventListener('click', () => go('register'));
+    $('#toLogin').addEventListener('click', () => go('login'));
+    $('#loginForm').addEventListener('submit', e => {
+      e.preventDefault();
+      submitLogin();
+    });
+    $('#registerForm').addEventListener('submit', e => {
+      e.preventDefault();
+      submitRegister();
+    });
+    $('#forgotBtn').addEventListener('click', () => {
+      const email = $('#loginEmail').value.trim();
+      if (!EMAIL_RE.test(email)) {
+        setAuthError($('#loginError'), '请先填写有效的 E-mail，再获取重置链接', $('#loginEmail'));
+        return;
+      }
+      clearAuthError($('#loginError'), $('#loginForm'));
+      toast('重置链接已发送至您的邮箱');
+    });
+    $('#wechatLogin').addEventListener('click', () => thirdPartyLogin('微信'));
+    $('#phoneLogin').addEventListener('click', () => thirdPartyLogin('手机号'));
+    $$('.auth-eye').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const input = $(`#${btn.dataset.eye}`);
+        if (!input) return;
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.classList.toggle('is-on', show);
+        btn.setAttribute('aria-pressed', String(show));
+        btn.setAttribute('aria-label', show ? '隐藏密码' : '显示密码');
+        $('use', btn).setAttribute('href', show ? '#i-eye-off' : '#i-eye');
+      });
+    });
+    $$('.auth-input').forEach(input => {
+      input.addEventListener('input', () => {
+        input.classList.remove('is-error');
+        const form = input.closest('form');
+        const err = form && $('.auth-error', form);
+        if (err) err.classList.remove('is-show');
+      });
+    });
+    $('#regAgree').addEventListener('change', () => $('#registerError').classList.remove('is-show'));
 
     // 键盘
     document.addEventListener('keydown', e => {

@@ -103,6 +103,29 @@
     <rect x="3.2" y="5.4" width="17.6" height="13.2" rx="2.2"/>
     <path d="M3.2 9.6h17.6M7 14.8h3.2"/>
   </symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24">
+    <path d="M2.6 12S6.2 5.8 12 5.8 21.4 12 21.4 12 17.8 18.2 12 18.2 2.6 12 2.6 12Z"/>
+    <circle cx="12" cy="12" r="3.1"/>
+  </symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24">
+    <path d="M4.2 4.4 19.8 20"/>
+    <path d="M9.8 6a10.2 10.2 0 0 1 2.2-.2c5.8 0 9.4 6.2 9.4 6.2a18 18 0 0 1-3.3 4"/>
+    <path d="M6.4 7.6A17.6 17.6 0 0 0 2.6 12s3.6 6.2 9.4 6.2c1.1 0 2.1-.2 3-.6"/>
+    <path d="M9.9 10a3.1 3.1 0 0 0 4.3 4.4"/>
+  </symbol>
+  <symbol id="i-wechat" viewBox="0 0 24 24">
+    <path d="M9.7 3.8c-3.7 0-6.6 2.4-6.6 5.4 0 1.7.9 3.2 2.4 4.2l-.6 2 2.3-1.1c.7.2 1.5.3 2.3.3"/>
+    <path d="M21.1 14.4c0-2.7-2.5-4.9-5.7-4.9s-5.7 2.2-5.7 4.9 2.5 4.9 5.7 4.9c.7 0 1.3-.1 1.9-.3l2 .9-.5-1.8c1.4-.9 2.3-2.2 2.3-3.7Z"/>
+    <circle cx="7.4" cy="8.4" r=".8" fill="currentColor" stroke="none"/>
+    <circle cx="11.6" cy="8.4" r=".8" fill="currentColor" stroke="none"/>
+    <circle cx="13.9" cy="13.6" r=".65" fill="currentColor" stroke="none"/>
+    <circle cx="17.4" cy="13.6" r=".65" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24">
+    <rect x="6.4" y="2.8" width="11.2" height="18.4" rx="2.6"/>
+    <path d="M10.4 5.6h3.2"/>
+    <path d="M12 17.7h.01"/>
+  </symbol>
 
   <!-- 青瓷茶壶插画 -->
   <symbol id="art-teapot" viewBox="0 0 120 120">
@@ -320,6 +343,75 @@
         </div>
       </section>
 
+      <!-- ================= 外卖 ================= -->
+      <section class="screen screen--delivery" id="screen-delivery" data-screen="delivery" aria-label="外卖配送">
+        <div class="delivery-head">
+          <button class="auth-back press" id="deliveryBack" aria-label="返回">
+            <svg class="ic"><use href="#i-chevron"/></svg>
+          </button>
+          <div class="delivery-head__title">
+            <h2>外卖</h2>
+            <p>DELIVERY · 解茶香</p>
+          </div>
+          <button class="mini-capsule press" data-capsule aria-label="小程序菜单">
+            <span class="capsule-dots"><i></i><i></i><i></i></span>
+            <span class="capsule-line"></span>
+            <span class="capsule-ring"></span>
+          </button>
+        </div>
+
+        <div class="delivery-scroll" data-scroll="delivery">
+          <button class="addr-card press" id="addrCard" aria-haspopup="dialog">
+            <span class="addr-card__icon"><svg class="ic"><use href="#i-pin"/></svg></span>
+            <span class="addr-card__body">
+              <span class="addr-card__label">配送到 <b id="addrTag">家</b></span>
+              <h3 id="addrText">北京市石景山区古城南街 9 号院 3 号楼 502</h3>
+              <span class="addr-card__meta" id="addrMeta">清茶茶友 138****8866 · 距门店 1.8km</span>
+            </span>
+            <span class="addr-card__change">切换 <svg class="ic"><use href="#i-chevron"/></svg></span>
+          </button>
+
+          <div class="delivery-eta">
+            <p class="delivery-eta__left">
+              <svg class="ic"><use href="#i-clock"/></svg>
+              预计 <b id="etaText">32 分钟</b> 送达
+            </p>
+            <div class="eta-chips" id="etaChips" role="group" aria-label="送达时间">
+              <button class="is-active" data-eta="asap">尽快</button>
+              <button data-eta="45">45 分</button>
+              <button data-eta="60">60 分</button>
+            </div>
+          </div>
+
+          <div class="delivery-promo">
+            <div class="delivery-promo__row">
+              <span class="delivery-promo__tag">外卖专享</span>
+              <p id="deliveryPromoText">满 ¥39 免配送费 · 新客立减 ¥3</p>
+              <button class="delivery-promo__btn press" data-toast="外卖专享券已放入卡包">领券</button>
+            </div>
+            <div class="delivery-promo__track"><i id="deliveryProgress"></i></div>
+          </div>
+
+          <div class="delivery-cats" id="deliveryCats" role="tablist" aria-label="外卖分类"></div>
+          <div class="delivery-grid" id="deliveryGrid"></div>
+          <p class="delivery-note">现泡现送 · 三公里内锁鲜配送</p>
+        </div>
+
+        <div class="delivery-bar" id="deliveryBar" aria-hidden="true">
+          <button class="delivery-bar__cart press" id="deliveryCartBtn" aria-label="查看已选茶饮">
+            <span class="delivery-bar__bag">
+              <svg class="ic"><use href="#i-bag"/></svg>
+              <b id="deliveryCount">0</b>
+            </span>
+            <span class="delivery-bar__sum">
+              <b id="deliveryTotal">¥0</b>
+              <small>含配送与打包费</small>
+            </span>
+          </button>
+          <button class="delivery-bar__go press" id="deliveryCheckout">去下单</button>
+        </div>
+      </section>
+
       <!-- ================= 种类 ================= -->
       <section class="screen screen--menu" id="screen-menu" data-screen="menu" aria-label="茶饮种类">
         <div class="menu-head" id="menuHead">
@@ -513,6 +605,129 @@
         </div>
       </section>
 
+      <!-- ============ 登录 ============ -->
+      <section class="screen screen--auth screen--login" id="screen-login" data-screen="login" aria-label="登录">
+        <span class="auth-deco auth-deco--a" aria-hidden="true"></span>
+        <span class="auth-deco auth-deco--b" aria-hidden="true"></span>
+        <span class="auth-rings" aria-hidden="true"></span>
+
+        <div class="auth-scroll" data-scroll="login">
+          <div class="auth-top">
+            <button class="auth-back press" id="loginBack" aria-label="返回">
+              <svg class="ic"><use href="#i-chevron"/></svg>
+            </button>
+            <span class="auth-brand">
+              <img src="assets/logo-mark-sm.png" alt="解茶香">
+            </span>
+          </div>
+
+          <header class="auth-head">
+            <p class="auth-kicker">JIE CHA XIANG · MEMBER</p>
+            <h1 class="auth-title">登录</h1>
+            <p class="auth-sub">继续你的壹杯清茶</p>
+          </header>
+
+          <form class="auth-form" id="loginForm" novalidate>
+            <label class="auth-field" style="--i:0">
+              <span class="auth-label">E-mail</span>
+              <span class="auth-inputwrap">
+                <input class="auth-input" id="loginEmail" type="email" inputmode="email" placeholder="958599XXXX@qq.com" autocomplete="email" autocapitalize="off" spellcheck="false">
+              </span>
+            </label>
+            <label class="auth-field" style="--i:1">
+              <span class="auth-label">密码</span>
+              <span class="auth-inputwrap">
+                <input class="auth-input" id="loginPassword" type="password" placeholder="请输入密码" autocomplete="current-password">
+                <button class="auth-eye press" type="button" data-eye="loginPassword" aria-label="显示密码" aria-pressed="false">
+                  <svg class="ic"><use href="#i-eye"/></svg>
+                </button>
+              </span>
+            </label>
+            <p class="auth-error" id="loginError" role="alert" aria-live="polite"></p>
+            <button class="auth-forgot press" type="button" id="forgotBtn">忘记密码？</button>
+            <button class="auth-submit press" type="submit">登录</button>
+            <p class="auth-switch">还没有帐号？<button class="auth-link" type="button" id="toRegister">立即注册</button></p>
+
+            <div class="auth-divider"><span>第三方帐号登录</span></div>
+            <div class="auth-third">
+              <button class="auth-third__btn press" type="button" id="wechatLogin">
+                <span class="auth-third__icon auth-third__icon--wechat"><svg class="ic"><use href="#i-wechat"/></svg></span>微信
+              </button>
+              <button class="auth-third__btn press" type="button" id="phoneLogin">
+                <span class="auth-third__icon"><svg class="ic"><use href="#i-phone"/></svg></span>手机号
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============ 注册 ============ -->
+      <section class="screen screen--auth screen--register" id="screen-register" data-screen="register" aria-label="注册">
+        <span class="auth-deco auth-deco--a" aria-hidden="true"></span>
+        <span class="auth-deco auth-deco--b" aria-hidden="true"></span>
+        <span class="auth-rings" aria-hidden="true"></span>
+
+        <div class="auth-scroll" data-scroll="register">
+          <div class="auth-top">
+            <button class="auth-back press" id="registerBack" aria-label="返回登录">
+              <svg class="ic"><use href="#i-chevron"/></svg>
+            </button>
+            <span class="auth-brand">
+              <img src="assets/logo-mark-sm.png" alt="解茶香">
+            </span>
+          </div>
+
+          <header class="auth-head">
+            <p class="auth-kicker">JIE CHA XIANG · MEMBER</p>
+            <h1 class="auth-title">注册</h1>
+            <p class="auth-sub">取一个茶名，留住这一味</p>
+          </header>
+
+          <form class="auth-form" id="registerForm" novalidate>
+            <label class="auth-field" style="--i:0">
+              <span class="auth-label">昵称</span>
+              <span class="auth-inputwrap">
+                <input class="auth-input" id="regName" type="text" placeholder="给自己起个茶名" autocomplete="nickname" maxlength="12">
+              </span>
+            </label>
+            <label class="auth-field" style="--i:1">
+              <span class="auth-label">E-mail</span>
+              <span class="auth-inputwrap">
+                <input class="auth-input" id="regEmail" type="email" inputmode="email" placeholder="958599XXXX@qq.com" autocomplete="email" autocapitalize="off" spellcheck="false">
+              </span>
+            </label>
+            <label class="auth-field" style="--i:2">
+              <span class="auth-label">密码</span>
+              <span class="auth-inputwrap">
+                <input class="auth-input" id="regPassword" type="password" placeholder="至少 6 位字符" autocomplete="new-password">
+                <button class="auth-eye press" type="button" data-eye="regPassword" aria-label="显示密码" aria-pressed="false">
+                  <svg class="ic"><use href="#i-eye"/></svg>
+                </button>
+              </span>
+            </label>
+            <label class="auth-field" style="--i:3">
+              <span class="auth-label">确认密码</span>
+              <span class="auth-inputwrap">
+                <input class="auth-input" id="regConfirm" type="password" placeholder="再输入一次密码" autocomplete="new-password">
+                <button class="auth-eye press" type="button" data-eye="regConfirm" aria-label="显示密码" aria-pressed="false">
+                  <svg class="ic"><use href="#i-eye"/></svg>
+                </button>
+              </span>
+            </label>
+
+            <label class="auth-terms">
+              <input type="checkbox" id="regAgree">
+              <span class="auth-terms__box"><svg class="ic"><use href="#i-check"/></svg></span>
+              <span class="auth-terms__text">我已阅读并同意 <em>《用户协议》</em> 与 <em>《隐私政策》</em></span>
+            </label>
+
+            <p class="auth-error" id="registerError" role="alert" aria-live="polite"></p>
+            <button class="auth-submit press" type="submit">注册并登录</button>
+            <p class="auth-switch">已有帐号？<button class="auth-link" type="button" id="toLogin">去登录</button></p>
+          </form>
+        </div>
+      </section>
+
     </main>
 
     <!-- ============ 底部导航 ============ -->
@@ -627,6 +842,44 @@
       <p class="store-regions__note" id="storeRegionNote"></p>
       <div class="store-list" id="storeList"></div>
       <p class="store-sheet__tip">到店前建议先致电确认营业时间</p>
+    </section>
+
+    <!-- 收货地址 -->
+    <section class="sheet sheet--addr" id="addressSheet" aria-label="选择收货地址">
+      <div class="sheet__grab"><i></i></div>
+      <div class="sheet__head">
+        <div>
+          <h3>选择收货地址</h3>
+          <p class="sheet__sub">配送范围 · 门店三公里内</p>
+        </div>
+        <button class="sheet__close press" data-close-sheet><svg class="ic"><use href="#i-close"/></svg></button>
+      </div>
+      <div class="addr-list" id="addrList"></div>
+      <button class="sheet__ghost press" data-toast="新增地址功能即将上线">＋ 新增收货地址</button>
+    </section>
+
+    <!-- 外卖下单确认 -->
+    <section class="sheet sheet--delivery" id="deliverySheet" aria-label="确认外卖订单">
+      <div class="sheet__grab"><i></i></div>
+      <div class="sheet__head">
+        <div>
+          <h3>确认外卖订单</h3>
+          <p class="sheet__sub" id="deliverySheetSub">配送到家 · 预计 32 分钟</p>
+        </div>
+        <button class="sheet__close press" data-close-sheet><svg class="ic"><use href="#i-close"/></svg></button>
+      </div>
+      <div class="delivery-sheet__scroll">
+        <div class="delivery-sheet__addr" id="deliverySheetAddr"></div>
+        <div class="delivery-sheet__items" id="deliveryItems"></div>
+        <div class="delivery-fees">
+          <p><span>商品小计</span><b id="feeSubtotal">¥0</b></p>
+          <p><span>配送费</span><b id="feeDelivery">¥3</b></p>
+          <p><span>打包费</span><b>¥1</b></p>
+          <p class="delivery-fees__off"><span>新客立减</span><b id="feeOff">-¥0</b></p>
+        </div>
+        <div class="delivery-sheet__total"><span>合计</span><b id="deliverySheetTotal">¥0</b></div>
+      </div>
+      <button class="delivery-submit press" id="deliverySubmit">提交订单</button>
     </section>
 
     <!-- 冲泡中 -->
