@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#F7F5E9">
 <title>解茶香</title>
+<link rel="icon" type="image/png" href="assets/logo-mark-sm.png">
+<link rel="apple-touch-icon" href="assets/logo-mark.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;900&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
@@ -182,7 +184,9 @@
         </button>
 
         <div class="splash">
+          <div class="splash-stage">
           <header class="brand brand--splash">
+            <div class="splash-logo"><img src="assets/logo-mark.png" alt="解茶香 LOGO"></div>
             <div class="brand__row">
               <i class="brand__bar"></i>
               <span class="brand__char" style="--i:0">解</span>
@@ -221,6 +225,8 @@
             </svg>
           </div>
 
+          </div>
+
           <p class="splash-tip">轻触任意处，入席品茶</p>
           <button class="skip-btn press" id="skipBtn">跳过</button>
           <span class="splash-progress"><i></i></span>
@@ -231,13 +237,16 @@
       <section class="screen" id="screen-home" data-screen="home" aria-label="首页">
         <div class="screen__scroll" data-scroll="home">
           <header class="home-head">
-            <div class="brand brand--sm">
-              <div class="brand__row">
-                <i class="brand__bar"></i><span class="brand__char">解</span>
-                <i class="brand__bar"></i><span class="brand__char">茶</span>
-                <i class="brand__bar"></i><span class="brand__char">香</span><i class="brand__bar"></i>
+            <div class="brand brand--sm brand--logo">
+              <img class="brand__logo" src="assets/logo-mark.png" alt="解茶香">
+              <div class="brand__text">
+                <div class="brand__row">
+                  <i class="brand__bar"></i><span class="brand__char">解</span>
+                  <i class="brand__bar"></i><span class="brand__char">茶</span>
+                  <i class="brand__bar"></i><span class="brand__char">香</span><i class="brand__bar"></i>
+                </div>
+                <p class="brand__en">JIE CHA XIANG · TEA</p>
               </div>
-              <p class="brand__en">JIE CHA XIANG · TEA</p>
             </div>
             <button class="mini-capsule press" data-capsule aria-label="小程序菜单">
               <span class="capsule-dots"><i></i><i></i><i></i></span>
@@ -316,7 +325,7 @@
         <div class="menu-head" id="menuHead">
           <div class="menu-head__row">
             <button class="brand-chip press" data-toast="解茶香 · 茶飲日記">
-              <svg class="ic"><use href="#i-leaf"/></svg>
+              <img class="brand-chip__logo" src="assets/logo-mark-sm.png" alt="">
               <span>解茶香</span>
               <svg class="ic brand-chip__arrow"><use href="#i-chevron-down"/></svg>
             </button>
@@ -444,14 +453,17 @@
           </div>
 
           <div class="profile-brand">
-            <div class="brand brand--sm brand--left">
-              <div class="brand__row">
-                <i class="brand__bar"></i><span class="brand__char">解</span>
-                <i class="brand__bar"></i><span class="brand__char">茶</span>
-                <i class="brand__bar"></i><span class="brand__char">香</span><i class="brand__bar"></i>
+            <div class="brand brand--sm brand--left brand--logo">
+              <img class="brand__logo brand__logo--lg" src="assets/logo-mark.png" alt="解茶香">
+              <div class="brand__text">
+                <div class="brand__row">
+                  <i class="brand__bar"></i><span class="brand__char">解</span>
+                  <i class="brand__bar"></i><span class="brand__char">茶</span>
+                  <i class="brand__bar"></i><span class="brand__char">香</span><i class="brand__bar"></i>
+                </div>
+                <p class="brand__sub brand__sub--sm">· 壹杯清茶 ·</p>
+                <p class="brand__en">JIE CHA XIANG · TEA</p>
               </div>
-              <p class="brand__sub brand__sub--sm">· 壹杯清茶 ·</p>
-              <p class="brand__en">JIE CHA XIANG · TEA</p>
             </div>
           </div>
 
