@@ -36,10 +36,10 @@
       id: 'season', name: '四季茶香',
       banner: ['一壶清茶 · 慢茶时光', 'SEASONAL TEA COLLECTION'],
       products: [
-        { id: 'white', name: '白茶系', desc: '雪梨陈皮白茶、寿眉纯茶套餐', price: 20 },
-        { id: 'red', name: '红茶系', desc: '苹果热橙荒野红茶、红茶轻乳茶', price: 20 },
-        { id: 'rock', name: '岩茶系', desc: '水仙岩茶、岩茶纯茶礼盒、寿眉纯茶套餐', price: 20 },
-        { id: 'green', name: '绿茶系', desc: '龙井冷泡、云雾绿茶奶', price: 20 }
+        { id: 'white', name: '白茶系', desc: '雪梨陈皮白茶、寿眉纯茶套餐', price: 20, img: 'assets/白茶系.png' },
+        { id: 'red', name: '红茶系', desc: '苹果热橙荒野红茶、红茶轻乳茶', price: 20, img: 'assets/红茶系.png' },
+        { id: 'rock', name: '岩茶系', desc: '水仙岩茶、岩茶纯茶礼盒、寿眉纯茶套餐', price: 20, img: 'assets/岩茶系.png' },
+        { id: 'green', name: '绿茶系', desc: '龙井冷泡、云雾绿茶奶', price: 20, img: 'assets/绿茶系.png' }
       ]
     },
     {
@@ -55,18 +55,18 @@
       id: 'milk', name: '轻乳奶茶',
       banner: ['轻乳一盏 · 温柔半日', 'LIGHT MILK TEA'],
       products: [
-        { id: 'rockmilk', name: '岩茶厚乳茶', desc: '肉桂岩茶、轻乳顶、岩骨花香', price: 23 },
-        { id: 'osmanthus', name: '桂花乌龙拿铁', desc: '桂花乌龙、鲜牛乳、三分糖', price: 24 },
-        { id: 'whitemilk', name: '白茶轻乳', desc: '白牡丹、轻乳、清甜不腻', price: 22 }
+        { id: 'rockmilk', name: '岩茶厚乳茶', desc: '肉桂岩茶、轻乳顶、岩骨花香', price: 23, img: 'assets/岩茶厚乳茶.png' },
+        { id: 'osmanthus', name: '桂花乌龙拿铁', desc: '桂花乌龙、鲜牛乳、三分糖', price: 24, img: 'assets/桂花乌龙拿铁.png' },
+        { id: 'whitemilk', name: '白茶轻乳', desc: '白牡丹、轻乳、清甜不腻', price: 22, img: 'assets/白茶轻乳.png' }
       ]
     },
     {
       id: 'cold', name: '清润冷萃',
       banner: ['冷萃慢滴 · 清润回甘', 'COLD BREW TEA'],
       products: [
-        { id: 'dancong', name: '冷萃单丛', desc: '凤凰单丛、八小时冷萃、蜜兰香', price: 26 },
-        { id: 'lemon', name: '柠檬冷萃绿茶', desc: '香水柠檬、冷萃云雾绿', price: 22 },
-        { id: 'peach', name: '蜜桃乌龙冷萃', desc: '水蜜桃、白桃乌龙、气泡感', price: 23 }
+        { id: 'dancong', name: '冷萃单丛', desc: '凤凰单丛、八小时冷萃、蜜兰香', price: 26, img: 'assets/冷萃单丛.png' },
+        { id: 'lemon', name: '柠檬冷萃绿茶', desc: '香水柠檬、冷萃云雾绿', price: 22, img: 'assets/柠檬冷萃绿茶.png' },
+        { id: 'peach', name: '蜜桃乌龙冷萃', desc: '水蜜桃、白桃乌龙、气泡感', price: 23, img: 'assets/蜜桃乌龙冷萃.png' }
       ]
     },
     {
@@ -420,7 +420,9 @@
     productList.innerHTML = list.map((p, i) => `
       <article class="product" style="--d:${i * 55}ms">
         <div class="product__thumb">
-          <svg viewBox="0 0 120 120" aria-hidden="true"><use href="#art-teapot"/></svg>
+          ${p.img
+            ? `<img src="${p.img}" alt="${p.name}" loading="lazy">`
+            : '<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#art-teapot"/></svg>'}
         </div>
         <div class="product__info">
           <h4>${p.name}</h4>
