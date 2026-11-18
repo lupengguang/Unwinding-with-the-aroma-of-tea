@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#F7F5E9">
+<title>清茗集 · 壹杯清茶</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;900&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============ 图标与插画符号 ============ -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="celadon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#A6B379"/>
+      <stop offset=".45" stop-color="#7C8C50"/>
+      <stop offset="1" stop-color="#4F5D2C"/>
+    </linearGradient>
+    <linearGradient id="celadonLid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8C9B5C"/>
+      <stop offset="1" stop-color="#66753C"/>
+    </linearGradient>
+    <radialGradient id="cupTea" cx=".45" cy=".4" r=".7">
+      <stop offset="0" stop-color="#D9E3AE"/>
+      <stop offset=".65" stop-color="#B7C680"/>
+      <stop offset="1" stop-color="#8FA05A"/>
+    </radialGradient>
+  </defs>
+
+  <symbol id="i-teapot" viewBox="0 0 24 24">
+    <path d="M4.4 12.7c0-2.6 3.4-4.3 7.6-4.3s7.6 1.7 7.6 4.3c0 3.8-3.1 6.1-7.6 6.1s-7.6-2.3-7.6-6.1Z"/>
+    <path d="M8.9 8.8c.2-1.3 1.5-2.3 3.1-2.3s2.9 1 3.1 2.3"/>
+    <path d="M12 5.9v.7"/>
+    <path d="M19.2 11.4c1.5.1 2.6 1.2 2.5 2.8-.1 1.4-1 2.3-2.2 2.5"/>
+    <path d="M4.8 11.4C3.2 10.8 2 9.8 1.5 8.4"/>
+  </symbol>
+
+  <symbol id="i-leaf" viewBox="0 0 24 24">
+    <path d="M20.6 3.7C10.9 4 4.4 9.7 4.6 19.6c9.4.3 15-5.9 16-15.9Z"/>
+    <path d="M4.8 19.4C7.6 15 11 11.8 15.4 9.4"/>
+  </symbol>
+
+  <symbol id="i-receipt" viewBox="0 0 24 24">
+    <path d="M6 3.6h12v16.8l-2.2-1.5-2 1.5-1.8-1.5-2 1.5-2-1.5L6 20.4Z"/>
+    <path d="M9 8.2h6M9 11.7h6M9 15.2h3.6"/>
+  </symbol>
+
+  <symbol id="i-user" viewBox="0 0 24 24">
+    <circle cx="12" cy="8" r="3.6"/>
+    <path d="M4.9 20c.6-3.6 3.5-5.8 7.1-5.8s6.5 2.2 7.1 5.8"/>
+  </symbol>
+
+  <symbol id="i-plus" viewBox="0 0 24 24">
+    <path d="M12 5.2v13.6M5.2 12h13.6"/>
+  </symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5.2 12h13.6"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24">
+    <circle cx="10.8" cy="10.8" r="6.6"/><path d="M15.8 15.8 20.6 20.6"/>
+  </symbol>
+  <symbol id="i-star" viewBox="0 0 24 24">
+    <path d="M12 3.6l2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8Z" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9.2 5.5 15.8 12l-6.6 6.5"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="M5.5 9.2 12 15.6l6.5-6.4"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24">
+    <path d="M12 21s6.4-5.6 6.4-11A6.4 6.4 0 0 0 5.6 10c0 5.4 6.4 11 6.4 11Z"/><circle cx="12" cy="10" r="2.4"/>
+  </symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24">
+    <rect x="3.6" y="3.6" width="6.4" height="6.4" rx="1.2"/>
+    <rect x="14" y="3.6" width="6.4" height="6.4" rx="1.2"/>
+    <rect x="3.6" y="14" width="6.4" height="6.4" rx="1.2"/>
+    <path d="M14 14h2.6v2.6H14zM17.8 17.8h2.6v2.6h-2.6z"/>
+  </symbol>
+  <symbol id="i-ticket" viewBox="0 0 24 24">
+    <path d="M3.6 8.2A2.2 2.2 0 0 0 3.6 12v3.8h16.8V12a2.2 2.2 0 0 0 0-3.8V5.4H3.6Z"/>
+    <path d="M9.4 5.8v12.4" stroke-dasharray="2 2.4"/>
+  </symbol>
+  <symbol id="i-headset" viewBox="0 0 24 24">
+    <path d="M4.4 14v-2.2a7.6 7.6 0 0 1 15.2 0V14"/>
+    <path d="M4.4 13.4h2.2v5.2H4.4zM17.4 13.4h2.2v5.2h-2.2z"/>
+    <path d="M17.4 18.6c0 1.3-1.4 2.2-3.2 2.2"/>
+  </symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24">
+    <path d="M5.4 8.4h13.2l-1 12H6.4Z"/>
+    <path d="M8.8 8.4V7a3.2 3.2 0 0 1 6.4 0v1.4"/>
+  </symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3 1.8"/>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5.4 12.4 4.4 4.4 8.8-9.2"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24">
+    <path d="M4 8.4V5.2A1.2 1.2 0 0 1 5.2 4h3.2M15.6 4h3.2A1.2 1.2 0 0 1 20 5.2v3.2M20 15.6v3.2a1.2 1.2 0 0 1-1.2 1.2h-3.2M8.4 20H5.2A1.2 1.2 0 0 1 4 18.8v-3.2"/>
+    <path d="M4 12h16"/>
+  </symbol>
+  <symbol id="i-card" viewBox="0 0 24 24">
+    <rect x="3.2" y="5.4" width="17.6" height="13.2" rx="2.2"/>
+    <path d="M3.2 9.6h17.6M7 14.8h3.2"/>
+  </symbol>
+
+  <!-- 青瓷茶壶插画 -->
+  <symbol id="art-teapot" viewBox="0 0 120 120">
+    <ellipse cx="60" cy="99" rx="33" ry="5.4" fill="#3F4A24" opacity=".13"/>
+    <path d="M34 64C25 60 18.6 53.4 15.4 44.6c-.8-2.3 2-4 3.6-2 4.8 6 10.8 9.6 17 10.6Z" fill="url(#celadon)"/>
+    <path d="M34 64C25 60 18.6 53.4 15.4 44.6c-.8-2.3 2-4 3.6-2 4.8 6 10.8 9.6 17 10.6" fill="none" stroke="#4B5828" stroke-opacity=".34" stroke-width="1.2"/>
+    <ellipse cx="17.4" cy="43.8" rx="2.6" ry="1.5" fill="#3F4A24" opacity=".45" transform="rotate(-28 17.4 43.8)"/>
+    <path d="M88 52.6c10.4-.6 18 4.4 18.6 13.4.4 7.4-3.6 12.6-10.4 14.4" fill="none" stroke="url(#celadon)" stroke-width="8.4" stroke-linecap="round"/>
+    <path d="M88 52.6c10.4-.6 18 4.4 18.6 13.4.4 7.4-3.6 12.6-10.4 14.4" fill="none" stroke="#4B5828" stroke-opacity=".26" stroke-width="1.1"/>
+    <path d="M36 53.4c0-11.4 48-11.4 48 0 9.6 9 9.8 25.4 1.2 33.6-8 7.4-42.4 7.4-50.4 0-8.6-8.2-8.4-24.6 1.2-33.6Z" fill="url(#celadon)"/>
+    <path d="M36 53.4c0-11.4 48-11.4 48 0 9.6 9 9.8 25.4 1.2 33.6-8 7.4-42.4 7.4-50.4 0-8.6-8.2-8.4-24.6 1.2-33.6Z" fill="none" stroke="#4B5828" stroke-opacity=".32" stroke-width="1.3"/>
+    <path d="M45 46.4c3.6-7.4 26.4-7.4 30 0Z" fill="url(#celadonLid)"/>
+    <path d="M44.6 46.8c5.2 2 25.6 2 30.8 0" fill="none" stroke="#46522A" stroke-opacity=".4" stroke-width="1.4" stroke-linecap="round"/>
+    <circle cx="60" cy="38.6" r="3.2" fill="#55632F"/>
+    <ellipse cx="47.6" cy="62.4" rx="9" ry="5.4" fill="#D8E0B8" opacity=".5" transform="rotate(-24 47.6 62.4)"/>
+    <path d="M42 78.4c7.4 5.2 21.6 6 30.6 1" fill="none" stroke="#3F4A24" stroke-width="1.2" opacity=".22" stroke-linecap="round"/>
+    <g fill="#3F4A24" opacity=".22">
+      <circle cx="54" cy="70" r=".9"/><circle cx="66" cy="73" r=".7"/><circle cx="72" cy="64" r=".8"/>
+      <circle cx="44" cy="66" r=".7"/><circle cx="58" cy="81" r=".75"/>
+    </g>
+  </symbol>
+
+  <!-- 线描茶壶与蒸汽 -->
+  <symbol id="art-steam-teapot" viewBox="0 0 200 140">
+    <g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M79 60c-8.6-1.8-15-7-19-14.6-1.4-2.7 2.2-5 4-2.6 4.8 6.2 10.8 9.6 16.4 10.6"/>
+      <path d="M130 56.6c13.4.8 20.6 10 19.4 20.6-.9 9-7.4 14.4-15.4 14.4"/>
+      <path d="M78 53.4c0-8 44.6-8 44.6 0 9.4 7 10 22.4 8 30.6-4 12-16 16.4-30.2 16.4s-26.2-4.4-30.2-16.4c-2-8.2-1.6-23.6 7.8-30.6Z"/>
+      <path d="M88 45.6c4-6.2 20-6.2 24 0"/>
+      <path d="M100 39.6v4"/>
+      <path d="M96 64c6-2 12 2 12 8s-6 10-12 8"/>
+      <path d="M75 88.4c8 5 42 5 50 0" opacity=".35"/>
+    </g>
+    <g class="steam" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" opacity=".55">
+      <path d="M88 31c-5-6 5-10 0-16s3-9 1-13"/>
+      <path d="M104 29c-4-5 4-8 0-13"/>
+      <path d="M120 33c-3-4 3-6 0-10"/>
+    </g>
+  </symbol>
+
+  <!-- 俯视茶杯 -->
+  <symbol id="art-top-cup" viewBox="0 0 120 120">
+    <ellipse cx="60" cy="60" rx="54" ry="54" fill="none" stroke="#DCE4BC" stroke-width="1" opacity=".28"/>
+    <ellipse cx="60" cy="60" rx="43" ry="43" fill="none" stroke="#DCE4BC" stroke-width="1" opacity=".22"/>
+    <ellipse cx="60" cy="60" rx="32" ry="32" fill="none" stroke="#DCE4BC" stroke-width="1" opacity=".16"/>
+    <circle cx="60" cy="60" r="26" fill="#E8EDD2"/>
+    <circle cx="60" cy="60" r="21.6" fill="url(#cupTea)"/>
+    <ellipse cx="52" cy="51" rx="6" ry="3.4" fill="#F1F5DA" opacity=".55" transform="rotate(-24 52 51)"/>
+    <path d="M52 48c4-3 9-3 12 0" stroke="#6C7B44" stroke-width="1.2" fill="none" opacity=".35"/>
+    <g fill="#5A6A31" opacity=".55">
+      <ellipse cx="68" cy="66" rx="4" ry="2.2" transform="rotate(30 68 66)"/>
+      <ellipse cx="58" cy="70" rx="3.4" ry="1.8" transform="rotate(-20 58 70)"/>
+    </g>
+  </symbol>
+</svg>
+
+<!-- ============ 手机舞台 ============ -->
+<div class="stage">
+  <div class="phone" id="phone" data-view="splash">
+
+    <!-- 状态栏 -->
+    <div class="statusbar">
+      <span class="statusbar__time" id="statusTime">1:20</span>
+      <div class="statusbar__icons">
+        <svg viewBox="0 0 18 12" class="sig"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.6" width="3" height="6.4" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".35"/></svg>
+        <svg viewBox="0 0 16 12" class="wifi"><path d="M8 11.2c-.7 0-1.3-.6-1.3-1.3S7.3 8.6 8 8.6s1.3.6 1.3 1.3-.6 1.3-1.3 1.3Zm0-4.2c-1.4 0-2.6.5-3.6 1.4l1 1c.7-.6 1.6-1 2.6-1s1.9.4 2.6 1l1-1c-1-.9-2.2-1.4-3.6-1.4Zm0-3.8c-2.2 0-4.2.8-5.7 2.3l1 1c1.2-1.2 2.9-1.9 4.7-1.9s3.5.7 4.7 1.9l1-1C12.2 4 10.2 3.2 8 3.2Z"/></svg>
+        <svg viewBox="0 0 25 12" class="bat"><rect x="0.5" y="0.5" width="21" height="11" rx="3.2" fill="none" stroke="currentColor" opacity=".4"/><rect x="2.2" y="2.2" width="16.4" height="7.6" rx="2"/><path d="M23 4.2v3.6c1-.3 1.6-1 1.6-1.8S24 4.5 23 4.2Z" opacity=".4"/></svg>
+      </div>
+    </div>
+
+    <main class="screens" id="screens">
+
+      <!-- ================= 启动页 ================= -->
+      <section class="screen screen--splash is-active is-playing" id="screen-splash" data-screen="splash" aria-label="启动页">
+        <button class="mini-capsule mini-capsule--splash press" data-capsule aria-label="小程序菜单">
+          <span class="capsule-dots"><i></i><i></i><i></i></span>
+          <span class="capsule-line"></span>
+          <span class="capsule-ring"></span>
+        </button>
+
+        <div class="splash">
+          <header class="brand brand--splash">
+            <div class="brand__row">
+              <i class="brand__bar"></i>
+              <span class="brand__char" style="--i:0">清</span>
+              <i class="brand__bar"></i>
+              <span class="brand__char" style="--i:1">茗</span>
+              <i class="brand__bar"></i>
+              <span class="brand__char" style="--i:2">集</span>
+              <i class="brand__bar"></i>
+            </div>
+            <p class="brand__sub">· 壹杯清茶 ·</p>
+            <p class="brand__en">QING MING TEA COLLECTION</p>
+          </header>
+
+          <div class="splash-art" aria-hidden="true">
+            <svg class="splash-art__wash" viewBox="0 0 340 150" preserveAspectRatio="none">
+              <path d="M6 118C64 52 128 122 190 66S292 22 334 70" fill="none" stroke="#8E9C5D" stroke-width="20" stroke-linecap="round" opacity=".12"/>
+            </svg>
+            <div class="splash-art__pot">
+              <svg viewBox="0 0 120 120"><use href="#art-teapot"/></svg>
+              <svg class="pour" viewBox="0 0 40 90">
+                <path d="M12 6C8 28 6 48 18 72c3 6 5 9 5 12" fill="none" stroke="#6F7E46" stroke-width="5.4" stroke-linecap="round" opacity=".82"/>
+                <path d="M23 62c4 5 6 12 4 18" fill="none" stroke="#6F7E46" stroke-width="3" stroke-linecap="round" opacity=".45"/>
+              </svg>
+            </div>
+            <div class="splash-art__words">
+              <span class="brush-char" style="--i:3">好</span><span class="brush-char" style="--i:4">茶</span>
+              <div class="splash-art__stack">
+                <span style="--i:5">不</span><span style="--i:6">断</span><span style="--i:7">友</span><span style="--i:8">情</span><span style="--i:9">不</span><span style="--i:10">散</span>
+              </div>
+            </div>
+            <div class="splash-art__seal">茶</div>
+            <svg class="splash-art__steam" viewBox="0 0 120 90">
+              <path d="M20 84c-10-14 10-20 2-32s8-18 2-28" fill="none" stroke="#7C8C50" stroke-width="2.4" stroke-linecap="round" opacity=".35"/>
+              <path d="M74 78c-9-11 7-17 1-27s7-15 2-24" fill="none" stroke="#7C8C50" stroke-width="2" stroke-linecap="round" opacity=".28"/>
+              <path d="M100 70c-5-8 5-13 1-21" fill="none" stroke="#7C8C50" stroke-width="1.8" stroke-linecap="round" opacity=".22"/>
+            </svg>
+          </div>
+
+          <p class="splash-tip">轻触任意处，入席品茶</p>
+          <button class="skip-btn press" id="skipBtn">跳过</button>
+          <span class="splash-progress"><i></i></span>
+        </div>
+      </section>
+
+      <!-- ================= 首页 ================= -->
+      <section class="screen" id="screen-home" data-screen="home" aria-label="首页">
+        <div class="screen__scroll" data-scroll="home">
+          <header class="home-head">
+            <div class="brand brand--sm">
+              <div class="brand__row">
+                <i class="brand__bar"></i><span class="brand__char">清</span>
+                <i class="brand__bar"></i><span class="brand__char">茗</span>
+                <i class="brand__bar"></i><span class="brand__char">集</span><i class="brand__bar"></i>
+              </div>
+              <p class="brand__en">QING MING TEA COLLECTION</p>
+            </div>
+            <button class="mini-capsule press" data-capsule aria-label="小程序菜单">
+              <span class="capsule-dots"><i></i><i></i><i></i></span>
+              <span class="capsule-line"></span>
+              <span class="capsule-ring"></span>
+            </button>
+          </header>
+
+          <div class="hero">
+            <div class="hero__sun"></div>
+            <div class="hero__photo">
+              <img src="assets/hero-tea-hill.jpg" alt="青山茶园与采茶人">
+            </div>
+            <div class="hero__mist"></div>
+            <div class="hero__glow"></div>
+
+            <h1 class="hero__title"><span>茶</span><span>的</span><span>世</span><span>界</span></h1>
+            <p class="hero__sub">品味東方茶香</p>
+
+            <div class="hero__vertical" aria-hidden="true">一盞清茶<br>半日浮生</div>
+            <svg class="hero__pot" viewBox="0 0 120 120" aria-hidden="true"><use href="#art-teapot"/></svg>
+            <div class="hero__big" aria-hidden="true"><span>茶</span><span>香</span></div>
+            <svg class="hero__leaf" viewBox="0 0 40 40" aria-hidden="true">
+              <path d="M33 6C16 7 7 16 7 33c16 1 25-9 26-27Z" fill="none" stroke="#6F7E46" stroke-width="1.3" opacity=".55"/>
+              <path d="M8 32C14 24 20 18 28 12" fill="none" stroke="#6F7E46" stroke-width="1" opacity=".45"/>
+            </svg>
+            <span class="hero__stamp" aria-hidden="true">清</span>
+          </div>
+
+          <div class="member-wrap">
+            <svg class="member-wrap__wave" viewBox="0 0 430 44" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0 26C64 4 138 40 216 25S354 2 430 22V44H0Z" fill="#FBF9EF"/>
+            </svg>
+            <section class="member-strip reveal">
+              <div class="member-strip__hi">
+                <span class="stars">★★★</span>
+                <b>你好茶友~</b>
+              </div>
+              <button class="member-strip__cell" data-nav="profile">
+                <span>优惠券</span><b data-home-stat="coupon">***</b>
+              </button>
+              <button class="member-strip__cell" data-nav="profile">
+                <span>积分</span><b data-home-stat="points">***</b>
+              </button>
+            </section>
+          </div>
+
+          <section class="mode-row reveal">
+            <button class="mode is-active press" data-mode="takeout">
+              <span class="mode__cn">自取</span>
+              <span class="mode__en">TAKE OUT</span>
+            </button>
+            <i class="mode__divider" aria-hidden="true"></i>
+            <button class="mode press" data-mode="delivery">
+              <span class="mode__cn">外卖</span>
+              <span class="mode__en">DELIVERY</span>
+            </button>
+          </section>
+
+          <button class="promo-card press reveal" data-nav="menu" id="promoCard">
+            <div class="promo-card__text">
+              <p class="promo-card__brand">清茗集 · 慢生活</p>
+              <h3>慢下来，請喝一杯茶</h3>
+              <p class="promo-card__sub">浮生半日閑 · 慢品茶香</p>
+            </div>
+            <svg class="promo-card__art" viewBox="0 0 200 140" aria-hidden="true"><use href="#art-steam-teapot"/></svg>
+            <span class="promo-card__sheen" aria-hidden="true"></span>
+          </button>
+
+          <p class="home-footer reveal">清 茗 集 · 山 野 之 间 · 壹 杯 清 茶</p>
+        </div>
+      </section>
+
+      <!-- ================= 种类 ================= -->
+      <section class="screen screen--menu" id="screen-menu" data-screen="menu" aria-label="茶饮种类">
+        <div class="menu-head" id="menuHead">
+          <div class="menu-head__row">
+            <button class="brand-chip press" data-toast="清茗集 · 茶飲日記">
+              <svg class="ic"><use href="#i-leaf"/></svg>
+              <span>茶飲日記</span>
+              <svg class="ic brand-chip__arrow"><use href="#i-chevron-down"/></svg>
+            </button>
+
+            <label class="search">
+              <svg class="ic"><use href="#i-search"/></svg>
+              <input id="searchInput" type="text" placeholder="搜尋茶飲、门店、优惠" autocomplete="off">
+              <button class="search__clear" id="searchClear" aria-label="清空搜索" hidden>
+                <svg class="ic"><use href="#i-close"/></svg>
+              </button>
+            </label>
+
+            <button class="mini-capsule press" data-capsule aria-label="小程序菜单">
+              <span class="capsule-dots"><i></i><i></i><i></i></span>
+              <span class="capsule-line"></span>
+              <span class="capsule-ring"></span>
+            </button>
+          </div>
+
+          <div class="store">
+            <div class="store__info">
+              <button class="store__name press" data-toast="已为您定位到最近门店">
+                <svg class="ic store__star"><use href="#i-star"/></svg>
+                南昌万寿宫店
+                <svg class="ic store__chev"><use href="#i-chevron"/></svg>
+              </button>
+              <p class="store__meta">
+                <svg class="ic"><use href="#i-pin"/></svg>
+                <span>距您520m</span>
+                <span class="store__open">营业中</span>
+              </p>
+            </div>
+            <div class="segmented" id="storeMode" role="group" aria-label="取茶方式">
+              <span class="segmented__thumb" aria-hidden="true"></span>
+              <button class="segmented__btn is-active" data-store-mode="takeout">自取</button>
+              <button class="segmented__btn" data-store-mode="delivery">外卖</button>
+            </div>
+          </div>
+
+          <div class="store__tags">
+            <span class="tag-pill"><b>¥2</b> 领取</span>
+            <button class="store__detail press" data-toast="南昌万寿宫店 · 09:00 - 22:00">门店详细信息</button>
+            <button class="store__more press" data-toast="更多门店信息">
+              更多 <svg class="ic"><use href="#i-chevron-down"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="menu-body">
+          <aside class="cats" id="catList" aria-label="茶饮分类"></aside>
+          <div class="menu-list" data-scroll="menu" id="menuList">
+            <div class="cat-banner">
+              <div class="cat-banner__text">
+                <p class="cat-banner__brand">清茗集</p>
+                <h3 class="cat-banner__title">一壶清茶 · 慢茶时光</h3>
+                <p class="cat-banner__sub">SEASONAL TEA COLLECTION</p>
+              </div>
+              <svg class="cat-banner__ripples" viewBox="0 0 220 120" aria-hidden="true">
+                <g fill="none" stroke="#DDE5BE" stroke-width="1" opacity=".3">
+                  <ellipse cx="158" cy="72" rx="30" ry="12"/><ellipse cx="158" cy="72" rx="44" ry="18"/><ellipse cx="158" cy="72" rx="58" ry="24"/><ellipse cx="158" cy="72" rx="74" ry="31"/>
+                </g>
+              </svg>
+              <svg class="cat-banner__cup" viewBox="0 0 120 120" aria-hidden="true"><use href="#art-top-cup"/></svg>
+              <svg class="cat-banner__steam" viewBox="0 0 80 60" aria-hidden="true">
+                <path d="M22 56c-6-8 6-12 1-20s5-11 1-17" fill="none" stroke="#E4EBC9" stroke-width="1.6" stroke-linecap="round" opacity=".5"/>
+                <path d="M48 52c-4-6 4-9 1-15s4-8 1-12" fill="none" stroke="#E4EBC9" stroke-width="1.4" stroke-linecap="round" opacity=".38"/>
+              </svg>
+            </div>
+            <div id="productList" class="products"></div>
+            <p class="menu-note">茶汤现泡 · 建议三十秒内取茶</p>
+          </div>
+        </div>
+
+        <div class="cart-bar" id="cartBar" aria-hidden="true">
+          <div class="cart-bar__left">
+            <span class="cart-bar__badge" id="cartBarCount">0</span>
+            <span class="cart-bar__total" id="cartBarTotal">¥0</span>
+          </div>
+          <button class="cart-bar__go press" id="openCart">去结算</button>
+        </div>
+      </section>
+
+      <!-- ================= 订单 ================= -->
+      <section class="screen" id="screen-orders" data-screen="orders" aria-label="我的订单">
+        <div class="sub-head">
+          <h2>我的订单</h2>
+          <button class="mini-capsule press" data-capsule aria-label="小程序菜单">
+            <span class="capsule-dots"><i></i><i></i><i></i></span>
+            <span class="capsule-line"></span>
+            <span class="capsule-ring"></span>
+          </button>
+        </div>
+
+        <div class="order-tabs" id="orderTabs">
+          <span class="order-tabs__ink" id="orderInk" aria-hidden="true"></span>
+          <button class="is-active" data-tab="all">全部订单</button>
+          <button data-tab="store">门店订单</button>
+          <button data-tab="coupon">券码订单</button>
+          <button data-tab="card">权益卡订单</button>
+        </div>
+
+        <div class="screen__scroll screen__scroll--orders" data-scroll="orders">
+          <div class="orders-empty" id="ordersEmpty">
+            <svg class="orders-empty__art" viewBox="0 0 120 120" aria-hidden="true"><use href="#art-teapot"/></svg>
+            <p id="ordersEmptyText">您暂时还没有订单啦~</p>
+            <button class="btn-primary press" data-nav="menu">去点单</button>
+          </div>
+          <div class="order-list" id="orderList"></div>
+        </div>
+      </section>
+
+      <!-- ================= 我的 ================= -->
+      <section class="screen" id="screen-profile" data-screen="profile" aria-label="我的">
+        <div class="screen__scroll" data-scroll="profile">
+          <div class="profile-head">
+            <button class="member-code press" id="memberCodeBtn">
+              <svg class="ic"><use href="#i-qr"/></svg>
+              <span>会员码</span>
+            </button>
+            <button class="mini-capsule press" data-capsule aria-label="小程序菜单">
+              <span class="capsule-dots"><i></i><i></i><i></i></span>
+              <span class="capsule-line"></span>
+              <span class="capsule-ring"></span>
+            </button>
+          </div>
+
+          <div class="profile-brand">
+            <div class="brand brand--sm brand--left">
+              <div class="brand__row">
+                <i class="brand__bar"></i><span class="brand__char">清</span>
+                <i class="brand__bar"></i><span class="brand__char">茗</span>
+                <i class="brand__bar"></i><span class="brand__char">集</span><i class="brand__bar"></i>
+              </div>
+              <p class="brand__sub brand__sub--sm">· 壹杯清茶 ·</p>
+              <p class="brand__en">QING MING TEA COLLECTION</p>
+            </div>
+          </div>
+
+          <section class="profile-intro">
+            <h2 id="greetingLine">Hi，<em>清茶茶友</em>，歡迎你</h2>
+            <p id="loginTip">登录成为会员享多重好礼~</p>
+            <button class="btn-login press" id="loginBtn">登录</button>
+          </section>
+
+          <section class="vip-card" id="vipCard">
+            <div class="vip-card__stats">
+              <div><span>余额</span><b data-stat="balance">***</b></div>
+              <div><span>优惠券</span><b data-stat="coupon">***</b></div>
+              <div><span>积分</span><b data-stat="points">***</b></div>
+            </div>
+            <div class="vip-card__foot">
+              <span>暂未开通此VIP特权</span>
+              <button class="vip-card__link press" data-toast="青瓷会员权益：生日茶礼 · 双倍积分 · 优先取茶">权益详情
+                <svg class="ic"><use href="#i-chevron"/></svg>
+              </button>
+            </div>
+            <span class="vip-card__shine" aria-hidden="true"></span>
+          </section>
+
+          <section class="profile-menu">
+            <button class="profile-row press" data-row="orders">
+              <span>订单中心</span><svg class="ic"><use href="#i-chevron"/></svg>
+            </button>
+            <button class="profile-row press" data-row="info">
+              <span>个人信息</span><svg class="ic"><use href="#i-chevron"/></svg>
+            </button>
+            <button class="profile-row press" data-row="service">
+              <span>客服中心</span><svg class="ic"><use href="#i-chevron"/></svg>
+            </button>
+            <button class="profile-row press" data-row="address">
+              <span>我的地址</span><svg class="ic"><use href="#i-chevron"/></svg>
+            </button>
+            <button class="profile-row press" data-row="rights">
+              <span>用户权益</span><svg class="ic"><use href="#i-chevron"/></svg>
+            </button>
+            <button class="profile-row press" data-row="account">
+              <span>账号管理</span><svg class="ic"><use href="#i-chevron"/></svg>
+            </button>
+          </section>
+
+          <p class="profile-version">清 茗 集 · Q I N G M I N G · V 1 . 0</p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ============ 底部导航 ============ -->
+    <nav class="tabbar" id="tabbar" aria-label="主导航">
+      <button class="tab is-active press" data-nav="home">
+        <svg class="ic"><use href="#i-teapot"/></svg><span>首页</span>
+      </button>
+      <button class="tab press" data-nav="menu">
+        <svg class="ic"><use href="#i-leaf"/></svg><span>种类</span>
+      </button>
+      <button class="tab tab--plus press" data-quick aria-label="快捷点单">
+        <span class="tab__halo"></span>
+        <span class="tab__plus"><svg class="ic"><use href="#i-plus"/></svg></span>
+        <span class="tab__badge" id="tabBadge" hidden>0</span>
+      </button>
+      <button class="tab press" data-nav="orders">
+        <svg class="ic"><use href="#i-receipt"/></svg><span>订单</span>
+      </button>
+      <button class="tab press" data-nav="profile">
+        <svg class="ic"><use href="#i-user"/></svg><span>我的</span>
+      </button>
+    </nav>
+
+    <!-- ============ 遮罩与弹层 ============ -->
+    <div class="backdrop" id="backdrop"></div>
+
+    <!-- 快捷动作面板 -->
+    <section class="sheet" id="actionSheet" aria-label="快捷操作">
+      <div class="sheet__grab"><i></i></div>
+      <div class="sheet__head">
+        <h3>想做点什么？</h3>
+        <button class="sheet__close press" data-close-sheet><svg class="ic"><use href="#i-close"/></svg></button>
+      </div>
+      <div class="quick-grid">
+        <button class="quick press" data-quick-action="order">
+          <span class="quick__icon"><svg class="ic"><use href="#i-teapot"/></svg></span>
+          <span>立即点单</span>
+        </button>
+        <button class="quick press" data-quick-action="scan">
+          <span class="quick__icon"><svg class="ic"><use href="#i-scan"/></svg></span>
+          <span>扫码取茶</span>
+        </button>
+        <button class="quick press" data-quick-action="coupon">
+          <span class="quick__icon"><svg class="ic"><use href="#i-ticket"/></svg></span>
+          <span>优惠券</span>
+        </button>
+        <button class="quick press" data-quick-action="service">
+          <span class="quick__icon"><svg class="ic"><use href="#i-headset"/></svg></span>
+          <span>联系客服</span>
+        </button>
+      </div>
+      <button class="sheet__ghost press" data-quick-action="replay">重看开屏动画</button>
+      <p class="sheet__tip">清茗集 · 壹杯清茶 · 慢下来</p>
+    </section>
+
+    <!-- 购物车 -->
+    <section class="sheet sheet--cart" id="cartSheet" aria-label="茶篮">
+      <div class="sheet__grab"><i></i></div>
+      <div class="sheet__head">
+        <h3>我的茶篮</h3>
+        <div class="sheet__head-right">
+          <button class="sheet__text press" id="clearCartBtn">清空</button>
+          <button class="sheet__close press" data-close-sheet><svg class="ic"><use href="#i-close"/></svg></button>
+        </div>
+      </div>
+      <div class="cart-list" id="cartList"></div>
+      <div class="cart-empty" id="cartEmpty">
+        <svg class="cart-empty__art" viewBox="0 0 200 140" aria-hidden="true"><use href="#art-steam-teapot"/></svg>
+        <p>茶篮还是空的，去挑一杯吧</p>
+      </div>
+      <div class="cart-foot" id="cartFoot">
+        <div class="cart-foot__sum">
+          <span>合计</span>
+          <b id="cartTotal">¥0</b>
+          <small>已含茶位费</small>
+        </div>
+        <button class="btn-primary btn-primary--wide press" id="checkoutBtn">去结算</button>
+      </div>
+    </section>
+
+    <!-- 会员码 -->
+    <section class="sheet sheet--member" id="memberSheet" aria-label="会员码">
+      <div class="sheet__grab"><i></i></div>
+      <div class="sheet__head">
+        <h3>青瓷会员码</h3>
+        <button class="sheet__close press" data-close-sheet><svg class="ic"><use href="#i-close"/></svg></button>
+      </div>
+      <div class="member-code-body">
+        <div class="qr-box" id="qrBox"></div>
+        <p class="member-code-name">清茗集 · 青瓷会员</p>
+        <p class="member-code-tip">请向店员出示此码，积分自动入账</p>
+        <p class="member-code-no" id="memberNo">QM · 2026 1118 0138</p>
+      </div>
+    </section>
+
+    <!-- 冲泡中 -->
+    <div class="brew-layer" id="brewLayer" aria-hidden="true">
+      <div class="brew">
+        <div class="brew__cup">
+          <svg viewBox="0 0 160 150">
+            <ellipse cx="80" cy="126" rx="44" ry="7" fill="#3F4A24" opacity=".1"/>
+            <path d="M42 72h76c0 30-15 46-38 46S42 102 42 72Z" fill="none" stroke="#6F7E46" stroke-width="2.4"/>
+            <path d="M118 78c14 0 21 8 21 17s-8 16-19 16" fill="none" stroke="#6F7E46" stroke-width="2.4"/>
+            <path d="M52 86c6 18 44 18 56 0Z" fill="#A9B87D" opacity=".45"/>
+            <g class="brew__steam" fill="none" stroke="#7C8C50" stroke-width="2" stroke-linecap="round" opacity=".5">
+              <path d="M64 60c-6-9 6-13 1-22s5-11 1-17"/>
+              <path d="M88 56c-5-7 5-11 1-18s4-9 1-14"/>
+            </g>
+          </svg>
+        </div>
+        <p class="brew__title">正在为您冲泡</p>
+        <p class="brew__sub">取山泉一盏，候茶香三巡</p>
+        <div class="brew__line"><i></i></div>
+      </div>
+    </div>
+
+    <!-- 下单成功 -->
+    <div class="success-layer" id="successLayer" aria-hidden="true">
+      <div class="success">
+        <span class="success__ring"><svg class="ic"><use href="#i-check"/></svg></span>
+        <p class="success__title">下单成功</p>
+        <p class="success__sub">茶已入壶，静候片刻</p>
+        <span class="success__no" id="successNo">QM 2026 1118 1320</span>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
