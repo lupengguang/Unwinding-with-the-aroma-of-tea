@@ -133,6 +133,7 @@
     search: '',
     storeId: 'bama-gucheng',
     storeRegion: 'gucheng',
+    storeQuery: '',
     cart: new Map(),
     orders: [],
     orderTab: 'all',
@@ -159,6 +160,8 @@
   const storeDetailBtn = $('#storeDetailBtn');
   const storeRegions = $('#storeRegions');
   const storeList = $('#storeList');
+  const storeSearchInput = $('#storeSearchInput');
+  const storeSearchClear = $('#storeSearchClear');
   const storeSheetSub = $('#storeSheetSub');
   const cartList = $('#cartList');
   const cartEmpty = $('#cartEmpty');
@@ -556,26 +559,73 @@
           <span>${region.name}</span><b>${count}</b>
         </button>`;
     }).join('');
-    const region = STORE_REGIONS.find(r => r.id === state.storeRegion) || STORE_REGIONS[0];
+    storeRegions.classList.toggle('is-searching', !!state.storeQuery.trim());
+  }
+
+  function regionName(id) {
+    return (STORE_REGIONS.find(r => r.id === id) || STORE_REGIONS[0]).name;
+  }
+
+  const escapeHtml = str => String(str).replace(/[&<>"']/g, ch => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]
+  ));
+
+  function highlight(text, query) {
+    const safe = escapeHtml(text);
+    if (!query) return safe;
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return safe.replace(new RegExp(escaped, 'gi'), match => `<mark class="store-mark">${match}</mark>`);
+  }
+
+  function storeResults() {
+    const q = state.storeQuery.trim().toLowerCase();
+    if (!q) return STORES.filter(s => s.region === state.storeRegion);
+    return STORES.filter(s => `${s.name} ${s.addr} ${s.tags.join(' ')}`.toLowerCase().includes(q));
+  }
+
+  function updateStoreMeta(count) {
+    const q = state.storeQuery.trim();
     const notes = {
       gucheng: '品牌茶店与老字号集中，距学院相对较近，选择丰富。',
       lugu: '社区商业发达，连锁品牌与茶城分布密集。',
       pingguo: '多个老字号分店与社区茶铺沿街分布。',
       other: '品牌特色鲜明，含商场店与品牌专营店。'
     };
-    $('#storeRegionNote').textContent = notes[region.id] || '';
+    if (q) {
+      storeSheetSub.textContent = `搜索“${q}” · ${count} 家门店`;
+      $('#storeRegionNote').textContent = `在全部 ${STORES.length} 家门店中搜索，点击区域可退出搜索`;
+    } else {
+      storeSheetSub.textContent = `北京市石景山区 · ${STORES.length} 家门店`;
+      $('#storeRegionNote').textContent = notes[state.storeRegion] || '';
+    }
   }
 
   function renderStoreList() {
-    const list = STORES.filter(s => s.region === state.storeRegion);
+    const q = state.storeQuery.trim();
+    const list = storeResults();
     storeList.scrollTop = 0;
+    updateStoreMeta(list.length);
+
+    if (!list.length) {
+      storeList.innerHTML = `
+        <div class="store-empty">
+          <span class="store-empty__icon"><svg class="ic"><use href="#i-search"/></svg></span>
+          <p>没有找到相关门店</p>
+          <span>换个关键词试试，如「吴裕泰」「古城」「老字号」</span>
+        </div>`;
+      return;
+    }
+
     storeList.innerHTML = list.map((s, i) => `
       <button class="store-item${s.id === state.storeId ? ' is-selected' : ''}" data-store-id="${s.id}" style="--i:${i}">
         <span class="store-item__pin"><svg class="ic"><use href="#i-pin"/></svg></span>
         <span class="store-item__body">
-          <span class="store-item__name">${s.name}</span>
-          <span class="store-item__addr">${s.addr}</span>
-          <span class="store-item__tags">${s.tags.map(t => `<span class="store-item__tag${t.includes('学院') ? ' store-item__tag--near' : ''}">${t}</span>`).join('')}</span>
+          <span class="store-item__name">${highlight(s.name, q)}</span>
+          <span class="store-item__addr">${highlight(s.addr, q)}</span>
+          <span class="store-item__tags">
+            ${q ? `<span class="store-item__tag store-item__tag--region">${regionName(s.region)}</span>` : ''}
+            ${s.tags.map(t => `<span class="store-item__tag${t.includes('学院') ? ' store-item__tag--near' : ''}">${highlight(t, q)}</span>`).join('')}
+          </span>
         </span>
         <span class="store-item__side">
           <span class="store-item__dist">${s.dist}</span>
@@ -588,7 +638,13 @@
   function renderStoreSheet() {
     renderStoreRegions();
     renderStoreList();
-    storeSheetSub.textContent = `北京市石景山区 · ${STORES.length} 家门店`;
+  }
+
+  function setStoreQuery(value) {
+    state.storeQuery = value;
+    storeSearchClear.hidden = !value.trim();
+    renderStoreList();
+    storeRegions.classList.toggle('is-searching', !!value.trim());
   }
 
   function selectStore(id) {
@@ -606,8 +662,6 @@
     const picked = storeList.querySelector(`[data-store-id="${id}"]`);
     if (picked) {
       $$('.store-item', storeList).forEach(el => el.classList.toggle('is-selected', el === picked));
-      picked.classList.add('is-picked');
-      setTimeout(() => picked.classList.remove('is-picked'), 520);
     }
 
     toast(`已切换至 ${store.name}`);
@@ -624,6 +678,9 @@
     if (name === 'member') syncMemberCode();
     if (name === 'store') {
       state.storeRegion = selectedStore().region;
+      state.storeQuery = '';
+      storeSearchInput.value = '';
+      storeSearchClear.hidden = true;
       renderStoreSheet();
     }
     sheet.style.transform = '';
@@ -1046,10 +1103,29 @@
     });
     storeRegions.addEventListener('click', e => {
       const chip = e.target.closest('[data-region]');
-      if (!chip || chip.dataset.region === state.storeRegion) return;
+      if (!chip) return;
+      const hadQuery = !!state.storeQuery.trim();
+      if (hadQuery) {
+        state.storeQuery = '';
+        storeSearchInput.value = '';
+        storeSearchClear.hidden = true;
+      }
+      if (chip.dataset.region === state.storeRegion && !hadQuery) return;
       state.storeRegion = chip.dataset.region;
       renderStoreRegions();
       renderStoreList();
+    });
+    storeSearchInput.addEventListener('input', e => setStoreQuery(e.target.value));
+    storeSearchInput.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && state.storeQuery) {
+        storeSearchInput.value = '';
+        setStoreQuery('');
+      }
+    });
+    storeSearchClear.addEventListener('click', () => {
+      storeSearchInput.value = '';
+      setStoreQuery('');
+      storeSearchInput.focus();
     });
     storeList.addEventListener('click', e => {
       const item = e.target.closest('[data-store-id]');
