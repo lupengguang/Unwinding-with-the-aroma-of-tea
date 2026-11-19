@@ -52,7 +52,13 @@
       products: [
         { id: 'grapefruit', name: '满杯西柚茶', desc: '红心西柚、茉莉初雪、少糖清爽', price: 22, img: 'assets/满杯西柚茶.png' },
         { id: 'grape', name: '青提茉莉冷萃', desc: '阳光青提、冷萃茉莉、鲜果肉', price: 24, img: 'assets/青提茉莉冷萃.png' },
-        { id: 'pear', name: '雪梨桂花乌龙', desc: '砀山雪梨、金桂、炭焙乌龙', price: 21, img: 'assets/雪梨桂花乌龙.png' }
+        { id: 'pear', name: '雪梨桂花乌龙', desc: '砀山雪梨、金桂、炭焙乌龙', price: 21, img: 'assets/雪梨桂花乌龙.png' },
+        { id: 'ducklemon', name: '鸭屎香柠檬茶', desc: '凤凰单丛鸭屎香、香水柠檬、手打去涩', price: 20, img: 'assets/鸭屎香柠檬茶.png' },
+        { id: 'whitepeach-cold', name: '白桃乌龙冷萃', desc: '水蜜桃果肉、白桃乌龙、冷萃八小时', price: 23, img: 'assets/白桃乌龙冷萃.png' },
+        { id: 'lychee-rose', name: '荔枝玫瑰红茶', desc: '岭南荔枝、干玫瑰、祁门红茶', price: 24, img: 'assets/荔枝玫瑰红茶.png' },
+        { id: 'pineapple-passion', name: '凤梨百香果茶', desc: '金钻凤梨、百香果、茉莉初雪', price: 22, img: 'assets/凤梨百香果茶.png' },
+        { id: 'watermelon-jasmine', name: '西瓜茉莉冰茶', desc: '麒麟西瓜、茉莉初雪、少糖', price: 21, img: 'assets/西瓜茉莉冰茶.png' },
+        { id: 'cherry-oolong', name: '车厘子乌龙', desc: '智利车厘子、炭焙乌龙、气泡感', price: 26, img: 'assets/车厘子乌龙.png' }
       ]
     },
     {
@@ -61,7 +67,13 @@
       products: [
         { id: 'rockmilk', name: '岩茶厚乳茶', desc: '肉桂岩茶、轻乳顶、岩骨花香', price: 23, img: 'assets/岩茶厚乳茶.png' },
         { id: 'osmanthus', name: '桂花乌龙拿铁', desc: '桂花乌龙、鲜牛乳、三分糖', price: 24, img: 'assets/桂花乌龙拿铁.png' },
-        { id: 'whitemilk', name: '白茶轻乳', desc: '白牡丹、轻乳、清甜不腻', price: 22, img: 'assets/白茶轻乳.png' }
+        { id: 'whitemilk', name: '白茶轻乳', desc: '白牡丹、轻乳、清甜不腻', price: 22, img: 'assets/白茶轻乳.png' },
+        { id: 'coconut-white', name: '生椰白茶', desc: '冷压生椰乳、贡眉白茶、清甜带椰香', price: 24, img: 'assets/生椰白茶.png' },
+        { id: 'matcha-milk', name: '抹茶轻乳', desc: '宇治抹茶、轻乳顶、微苦回甘', price: 25, img: 'assets/抹茶轻乳.png' },
+        { id: 'brownsugar-pearl', name: '黑糖珍珠鲜奶茶', desc: '手炒黑糖、木薯珍珠、鲜牛乳+锡兰红茶', price: 22, img: 'assets/黑糖珍珠鲜奶茶.png' },
+        { id: 'mint-green', name: '薄荷奶绿', desc: '新鲜薄荷、茉莉绿茶、轻乳', price: 23, img: 'assets/薄荷奶绿.png' },
+        { id: 'taro-white', name: '芋泥白茶鲜奶', desc: '荔浦芋泥、福鼎白茶、鲜牛乳', price: 26, img: 'assets/芋泥白茶鲜奶.png' },
+        { id: 'gardenia-milk', name: '栀子花轻乳', desc: '栀子花绿茶、轻乳、花香收尾', price: 24, img: 'assets/栀子花轻乳.png' }
       ]
     },
     {
@@ -70,7 +82,13 @@
       products: [
         { id: 'dancong', name: '冷萃单丛', desc: '凤凰单丛、八小时冷萃、蜜兰香', price: 26, img: 'assets/冷萃单丛.png' },
         { id: 'lemon', name: '柠檬冷萃绿茶', desc: '香水柠檬、冷萃云雾绿', price: 22, img: 'assets/柠檬冷萃绿茶.png' },
-        { id: 'peach', name: '蜜桃乌龙冷萃', desc: '水蜜桃、白桃乌龙、气泡感', price: 23, img: 'assets/蜜桃乌龙冷萃.png' }
+        { id: 'peach', name: '蜜桃乌龙冷萃', desc: '水蜜桃、白桃乌龙、气泡感', price: 23, img: 'assets/蜜桃乌龙冷萃.png' },
+        { id: 'jasmine-silver', name: '冷萃茉莉银针', desc: '茉莉花窨白毫银针、冷萃八小时、毫香清甜', price: 22, img: 'assets/冷萃茉莉银针.png' },
+        { id: 'earl-grey', name: '冷萃伯爵红茶', desc: '佛手柑伯爵、冷萃、柑橘香气', price: 21, img: 'assets/冷萃伯爵红茶.png' },
+        { id: 'osmanthus-longjing', name: '冷萃桂花龙井', desc: '金桂、明前龙井、冷萃一夜、豆香带桂', price: 22, img: 'assets/冷萃桂花龙井.png' },
+        { id: 'oolong-sparkling', name: '冷萃乌龙气泡', desc: '炭焙乌龙、气泡水、微苦回甘', price: 24, img: 'assets/冷萃乌龙气泡.png' },
+        { id: 'roselle-rose', name: '冷萃洛神玫瑰', desc: '洛神花、重瓣玫瑰、微酸生津', price: 20, img: 'assets/冷萃洛神玫瑰.png' },
+        { id: 'hawthorn-peel', name: '冷萃山楂陈皮', desc: '山楂、新会陈皮、饭后消食', price: 23, img: 'assets/冷萃山楂陈皮.png' }
       ]
     },
     {
@@ -79,7 +97,13 @@
       products: [
         { id: 'bean', name: '绿豆糕', desc: '手作绿豆糕、清甜细腻、佐茶佳品', price: 12, img: 'assets/绿豆糕.png' },
         { id: 'jelly', name: '桂花茶冻', desc: '桂花蜜、白茶冻、入口即化', price: 15, img: 'assets/桂花茶冻.png' },
-        { id: 'cookie', name: '岩茶桃酥', desc: '岩茶粉、桃酥、酥松回甘', price: 16, img: 'assets/岩茶桃酥.png' }
+        { id: 'cookie', name: '岩茶桃酥', desc: '岩茶粉、桃酥、酥松回甘', price: 16, img: 'assets/岩茶桃酥.png' },
+        { id: 'silverneedle-pastry', name: '白毫银针酥', desc: '白茶粉入酥皮、豆沙内馅、层层起酥', price: 16, img: 'assets/白毫银针酥.png' },
+        { id: 'peel-beancake', name: '陈皮红豆糕', desc: '新会陈皮、手打红豆沙、清甜不腻', price: 14, img: 'assets/陈皮红豆糕.png' },
+        { id: 'osmanthus-ricecake', name: '桂花米糕', desc: '糯米现蒸、桂花蜜、软糯带花香', price: 13, img: 'assets/桂花米糕.png' },
+        { id: 'tieguanyin-nougat', name: '铁观音牛轧糖', desc: '铁观音茶粉、大颗杏仁、手工切块', price: 18, img: 'assets/铁观音牛轧糖.png' },
+        { id: 'matcha-daifuku', name: '抹茶红豆大福', desc: '宇治抹茶、蜜红豆、麻薯皮软糯', price: 16, img: 'assets/抹茶红豆大福.png' },
+        { id: 'spiced-seeds', name: '五香茶瓜子', desc: '五香微咸、颗颗饱满、佐茶解腻', price: 10, img: 'assets/五香茶瓜子.png' }
       ]
     }
   ];
