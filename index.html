@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;900&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261119-rights">
+<link rel="stylesheet" href="css/style.css?v=20261120-admin">
 </head>
 <body>
 
@@ -830,6 +830,9 @@
             <button class="profile-row press" data-row="rights">
               <span>用户权益</span><svg class="ic"><use href="#i-chevron"/></svg>
             </button>
+            <button class="profile-row press" data-row="admin">
+              <span>商品管理</span><span class="profile-row__meta"><b>商品与库存</b><svg class="ic"><use href="#i-chevron"/></svg></span>
+            </button>
             <button class="profile-row press" data-row="account">
               <span>账号管理</span><svg class="ic"><use href="#i-chevron"/></svg>
             </button>
@@ -976,6 +979,104 @@
             </div>
           </details>
           <p class="rights-footer">清茶有期 · 礼遇常伴<br>JIE CHA XIANG MEMBERSHIP</p>
+        </div>
+      </section>
+
+      <!-- ================= 商品管理 ================= -->
+      <section class="screen screen--order-detail screen--admin" id="screen-admin" data-screen="admin" aria-label="商品管理">
+        <header class="order-detail-head">
+          <button class="auth-back press" id="adminBack" aria-label="返回个人中心">
+            <svg class="ic"><use href="#i-chevron"/></svg>
+          </button>
+          <div class="order-detail-head__title">
+            <h2>商品管理</h2>
+            <p>STORE OPERATIONS</p>
+          </div>
+          <button class="mini-capsule press" data-capsule aria-label="小程序菜单">
+            <span class="capsule-dots"><i></i><i></i><i></i></span>
+            <span class="capsule-line"></span>
+            <span class="capsule-ring"></span>
+          </button>
+        </header>
+
+        <div class="order-detail-scroll admin-scroll" data-scroll="admin">
+          <section class="admin-hero" aria-labelledby="adminHeroTitle">
+            <small>PRODUCT & INVENTORY</small>
+            <div class="admin-hero__row">
+              <div>
+                <h2 id="adminHeroTitle">好茶有序，库存有度</h2>
+                <p>管理门店商品，实时同步顾客点单页</p>
+              </div>
+              <button class="admin-add-toggle press" id="adminAddToggle" type="button" aria-expanded="false" aria-controls="adminProductForm">
+                <svg class="ic"><use href="#i-plus"/></svg><span>添加产品</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="admin-stats" aria-label="商品库存统计">
+            <div><span>商品总数</span><p><strong id="adminTotalCount">0</strong><small>款</small></p></div>
+            <div><span>已上架</span><p><strong id="adminListedCount">0</strong><small>款</small></p></div>
+            <div><span>总库存</span><p><strong id="adminStockTotal">0</strong><small>件</small></p></div>
+          </section>
+
+          <form class="admin-form" id="adminProductForm" novalidate hidden>
+            <div class="admin-form__head">
+              <div><small>NEW PRODUCT</small><h3>添加新产品</h3></div>
+              <button type="button" class="admin-form__close press" id="adminFormCancel" aria-label="收起添加产品表单"><svg class="ic"><use href="#i-close"/></svg></button>
+            </div>
+            <label class="admin-field admin-field--full">
+              <span>产品名称 <b>*</b></span>
+              <input id="adminProductName" type="text" maxlength="24" placeholder="例如：桂花雪梨白茶" autocomplete="off">
+            </label>
+            <div class="admin-form__grid">
+              <label class="admin-field">
+                <span>所属分类 <b>*</b></span>
+                <select id="adminProductCategory">
+                  <option value="season">四季茶香</option>
+                  <option value="fruit">鲜果调茶</option>
+                  <option value="milk">轻乳奶茶</option>
+                  <option value="cold">清润冷萃</option>
+                  <option value="snack">茶點小食</option>
+                </select>
+              </label>
+              <label class="admin-field">
+                <span>销售价格 <b>*</b></span>
+                <div class="admin-field__price"><i>¥</i><input id="adminProductPrice" type="number" min="0.01" max="9999" step="0.01" placeholder="0.00"></div>
+              </label>
+              <label class="admin-field">
+                <span>初始库存 <b>*</b></span>
+                <input id="adminProductStock" type="number" min="0" step="1" value="0">
+              </label>
+              <label class="admin-field">
+                <span>图片地址</span>
+                <input id="adminProductImage" type="url" placeholder="https:// 可选" autocomplete="off">
+              </label>
+            </div>
+            <label class="admin-field admin-field--full">
+              <span>产品描述</span>
+              <textarea id="adminProductDesc" rows="3" maxlength="80" placeholder="原料、口感与产品特色"></textarea>
+            </label>
+            <p class="admin-form__error" id="adminFormError" role="alert"></p>
+            <button class="admin-form__submit press" type="submit"><svg class="ic"><use href="#i-plus"/></svg>确认添加产品</button>
+          </form>
+
+          <section class="admin-catalog" aria-labelledby="adminCatalogTitle">
+            <div class="admin-section-head">
+              <div><small>PRODUCT CATALOG</small><h2 id="adminCatalogTitle">商品列表</h2></div>
+              <span id="adminResultCount">0 款商品</span>
+            </div>
+            <label class="admin-search">
+              <svg class="ic"><use href="#i-search"/></svg>
+              <input id="adminSearch" type="search" placeholder="搜索商品名称或描述" autocomplete="off" aria-label="搜索管理商品">
+            </label>
+            <div class="admin-filters" id="adminFilters" role="group" aria-label="商品上架状态筛选">
+              <button type="button" class="is-active" data-admin-filter="all" aria-pressed="true">全部</button>
+              <button type="button" data-admin-filter="listed" aria-pressed="false">已上架</button>
+              <button type="button" data-admin-filter="unlisted" aria-pressed="false">已下架</button>
+            </div>
+            <div class="admin-list" id="adminList"></div>
+          </section>
+          <p class="admin-note"><svg class="ic"><use href="#i-info"/></svg>商品与库存数据保存在当前浏览器，下架后顾客端将同步隐藏。</p>
         </div>
       </section>
 
@@ -1457,6 +1558,6 @@
   </div>
 </div>
 
-<script src="js/app.js?v=20261119-rights"></script>
+<script src="js/app.js?v=20261120-admin"></script>
 </body>
 </html>

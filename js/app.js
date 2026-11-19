@@ -17,6 +17,7 @@
     payment: $('#screen-payment'),
     coupons: $('#screen-coupons'),
     rights: $('#screen-rights'),
+    admin: $('#screen-admin'),
     profile: $('#screen-profile'),
     login: $('#screen-login'),
     register: $('#screen-register'),
@@ -161,21 +162,89 @@
     snack: 'TEA SNACKS'
   };
 
+  const ADMIN_STORAGE_KEY = 'jiechaxiang-admin-v1';
+  const DEFAULT_PRODUCT_STOCK = 20;
+
+  function safeProductImage(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    if (/^assets\/[a-z0-9\u4e00-\u9fff._/-]+$/i.test(raw) && !raw.includes('..')) return raw;
+    try {
+      const url = new URL(raw);
+      return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  function readAdminData() {
+    const fallback = { overrides: {}, custom: [] };
+    try {
+      const saved = JSON.parse(localStorage.getItem(ADMIN_STORAGE_KEY) || 'null');
+      if (!saved || typeof saved !== 'object') return fallback;
+      const usedIds = new Set(CATEGORIES.flatMap(cat => cat.products.map(p => p.id)));
+      const custom = [];
+      (Array.isArray(saved.custom) ? saved.custom : []).forEach(item => {
+        if (!item || typeof item !== 'object') return;
+        const id = String(item.id || '');
+        const catId = String(item.catId || '');
+        const name = String(item.name || '').trim().slice(0, 24);
+        const price = Number(item.price);
+        if (!/^custom-[a-z0-9-]+$/i.test(id) || usedIds.has(id)) return;
+        if (!CATEGORIES.some(cat => cat.id === catId) || !name || !Number.isFinite(price) || price <= 0) return;
+        custom.push({
+          id, catId, name,
+          desc: String(item.desc || '').trim().slice(0, 80) || '门店新制茶品，欢迎品尝',
+          price: Math.round(price * 100) / 100,
+          img: safeProductImage(item.img),
+          custom: true
+        });
+        usedIds.add(id);
+      });
+      const overrides = {};
+      if (saved.overrides && typeof saved.overrides === 'object' && !Array.isArray(saved.overrides)) {
+        Object.entries(saved.overrides).forEach(([id, value]) => {
+          if (!value || typeof value !== 'object') return;
+          overrides[id] = {
+            listed: value.listed !== false,
+            stock: Number.isSafeInteger(value.stock) && value.stock >= 0 ? value.stock : DEFAULT_PRODUCT_STOCK
+          };
+        });
+      }
+      return { overrides, custom };
+    } catch (error) {
+      return fallback;
+    }
+  }
+
+  const adminData = readAdminData();
+  adminData.custom.forEach(product => {
+    const cat = CATEGORIES.find(item => item.id === product.catId);
+    if (cat) cat.products.push({ ...product });
+  });
+
   const PRODUCT_INDEX = new Map();
-  CATEGORIES.forEach(cat => cat.products.forEach(p => {
-    const info = CAT_INFO[cat.id] || {};
-    PRODUCT_INDEX.set(p.id, {
-      ...p, cat: cat.name, catId: cat.id,
-      temps: CAT_TEMPS[cat.id] || [],
-      sugars: CAT_SUGARS[cat.id] || [],
-      sizes: CAT_SIZES[cat.id] || [],
-      addons: CAT_ADDONS[cat.id] || [],
-      origin: p.origin || info.origin || '',
-      taste: p.taste || info.taste || '',
-      allergen: p.allergen || info.allergen || '',
-      kcal: p.kcal != null ? p.kcal : (info.kcal != null ? info.kcal : 0)
-    });
-  }));
+  function rebuildProductIndex() {
+    PRODUCT_INDEX.clear();
+    CATEGORIES.forEach(cat => cat.products.forEach(p => {
+      const info = CAT_INFO[cat.id] || {};
+      const override = adminData.overrides[p.id] || {};
+      p.listed = override.listed !== false;
+      p.stock = Number.isSafeInteger(override.stock) && override.stock >= 0 ? override.stock : DEFAULT_PRODUCT_STOCK;
+      PRODUCT_INDEX.set(p.id, {
+        ...p, cat: cat.name, catId: cat.id,
+        temps: CAT_TEMPS[cat.id] || [],
+        sugars: CAT_SUGARS[cat.id] || [],
+        sizes: CAT_SIZES[cat.id] || [],
+        addons: CAT_ADDONS[cat.id] || [],
+        origin: p.origin || info.origin || '',
+        taste: p.taste || info.taste || '',
+        allergen: p.allergen || info.allergen || '',
+        kcal: p.kcal != null ? p.kcal : (info.kcal != null ? info.kcal : 0)
+      });
+    }));
+  }
+  rebuildProductIndex();
 
   /* ---------------- 门店数据 ---------------- */
   const STORE_REGIONS = [
@@ -253,6 +322,8 @@
     couponTab: 'all',
     couponFrom: 'profile',
     rightsAsset: 'balance',
+    adminFilter: 'all',
+    adminSearch: '',
     memberName: '清茶茶友',
     loggedIn: false,
     deliveryCat: 'all',
@@ -406,10 +477,11 @@
       if (n === 'delivery') return TAB_ORDER.length + 2;
       if (n === 'about') return TAB_ORDER.length + 3;
       if (n === 'rights') return TAB_ORDER.length + 4;
-      if (n === 'coupons') return TAB_ORDER.length + 5;
-      if (n === 'product') return TAB_ORDER.length + 6;
-      if (n === 'orderDetail') return TAB_ORDER.length + 7;
-      if (n === 'payment') return TAB_ORDER.length + 8;
+      if (n === 'admin') return TAB_ORDER.length + 5;
+      if (n === 'coupons') return TAB_ORDER.length + 6;
+      if (n === 'product') return TAB_ORDER.length + 7;
+      if (n === 'orderDetail') return TAB_ORDER.length + 8;
+      if (n === 'payment') return TAB_ORDER.length + 9;
       const i = TAB_ORDER.indexOf(n);
       return i === -1 ? 0 : i;
     };
@@ -480,7 +552,7 @@
       try { inAnim.cancel(); } catch (e) {}
     };
 
-    if (name === 'login' || name === 'register' || name === 'delivery' || name === 'about' || name === 'product' || name === 'orderDetail' || name === 'payment' || name === 'coupons' || name === 'rights') {
+    if (name === 'login' || name === 'register' || name === 'delivery' || name === 'about' || name === 'product' || name === 'orderDetail' || name === 'payment' || name === 'coupons' || name === 'rights' || name === 'admin') {
       const sc = $(`[data-scroll="${name}"]`);
       if (sc) sc.scrollTop = 0;
       if (name === 'login' || name === 'register') {
@@ -499,9 +571,11 @@
       renderOrders();
     }
     if (name === 'menu') {
+      renderProducts();
       setTimeout(updateCartUI, 60);
     }
     if (name === 'rights') renderRightsAsset();
+    if (name === 'admin') renderAdmin();
   }
 
   function leaveSplash() {
@@ -533,7 +607,7 @@
 
   function updateTabs() {
     $$('#tabbar .tab[data-nav]').forEach(btn => {
-      const activeView = current === 'orderDetail' ? 'orders' : current === 'payment' ? 'menu' : ['coupons', 'rights'].includes(current) ? 'profile' : current;
+      const activeView = current === 'orderDetail' ? 'orders' : current === 'payment' ? 'menu' : ['coupons', 'rights', 'admin'].includes(current) ? 'profile' : current;
       btn.classList.toggle('is-active', btn.dataset.nav === activeView);
     });
   }
@@ -549,12 +623,14 @@
     if (state.search) {
       const q = state.search.toLowerCase();
       return CATEGORIES.flatMap(cat => cat.products).filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        p.desc.toLowerCase().includes(q)
+        p.listed !== false && (
+          p.name.toLowerCase().includes(q) ||
+          p.desc.toLowerCase().includes(q)
+        )
       );
     }
     const cat = CATEGORIES.find(c => c.id === state.cat) || CATEGORIES[0];
-    return cat.products;
+    return cat.products.filter(p => p.listed !== false);
   }
 
   function renderProducts() {
@@ -568,18 +644,18 @@
       return;
     }
     productList.innerHTML = list.map((p, i) => `
-      <article class="product" data-pid="${p.id}" style="--d:${i * 55}ms" tabindex="0" role="button" aria-label="选购${p.name}">
+      <article class="product" data-pid="${escapeHtml(p.id)}" style="--d:${i * 55}ms" tabindex="0" role="button" aria-label="选购${escapeHtml(p.name)}">
         <div class="product__thumb">
           ${p.img
-            ? `<img src="${p.img}" alt="${p.name}" loading="lazy">`
+            ? `<img src="${escapeHtml(p.img)}" alt="${escapeHtml(p.name)}" loading="lazy">`
             : '<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#art-teapot"/></svg>'}
         </div>
         <div class="product__info">
-          <h4>${p.name}</h4>
-          <p>${p.desc}</p>
+          <h4>${escapeHtml(p.name)}</h4>
+          <p>${escapeHtml(p.desc)}</p>
           <div class="product__price"><span>¥</span>${p.price}</div>
         </div>
-        <button class="product__add" data-add="${p.id}" aria-label="将${p.name}加入茶篮">
+        <button class="product__add" data-add="${escapeHtml(p.id)}" aria-label="将${escapeHtml(p.name)}加入茶篮">
           <svg class="ic"><use href="#i-plus"/></svg>
         </button>
       </article>
@@ -635,7 +711,7 @@
     return [...state.cart.entries()]
       .map(([key, item]) => {
         const p = PRODUCT_INDEX.get(item.id);
-        if (!p) return null;
+        if (!p || p.listed === false) return null;
         const price = priceOfItem(item.id, item.temp, item.sugar, item.size, item.addons);
         return { ...p, qty: item.qty, temp: item.temp, sugar: item.sugar || '',
                  size: item.size || '', addons: item.addons || [], price, key };
@@ -656,7 +732,10 @@
 
   function addToCart(id, temp, qty, btn, flyTarget, sugar, size, addons) {
     const p = PRODUCT_INDEX.get(id);
-    if (!p) return;
+    if (!p || p.listed === false) {
+      toast('该商品已下架，暂时无法加入茶篮');
+      return;
+    }
     const t = temp || (p.temps && p.temps[0]) || '';
     const s = sugar || (p.sugars && p.sugars.includes('正常糖') ? '正常糖' : (p.sugars && p.sugars[0])) || '';
     const sz = size || (p.sizes && p.sizes[0]) || '';
@@ -709,7 +788,7 @@
   const productTotalEl = $('#productTotal');
 
   function productArtMarkup(p) {
-    if (p.img) return `<img src="${p.img}" alt="${p.name}">`;
+    if (p.img) return `<img src="${escapeHtml(p.img)}" alt="${escapeHtml(p.name)}">`;
     const art = p.catId === 'fruit' || p.catId === 'cold' ? 'art-top-cup' : 'art-teapot';
     return `<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#${art}"/></svg>`;
   }
@@ -776,7 +855,10 @@
 
   function openProduct(id, from) {
     const p = PRODUCT_INDEX.get(id);
-    if (!p) return;
+    if (!p || p.listed === false) {
+      toast('该商品已下架，请选择其他茶品');
+      return;
+    }
     state.productId = id;
     state.productTemp = (p.temps && p.temps[0]) || '';
     state.productSugar = (p.sugars && p.sugars.includes('正常糖')) ? '正常糖' : ((p.sugars && p.sugars[0]) || '');
@@ -819,7 +901,7 @@
       <div class="cart-item">
         <div class="cart-item__thumb">
           ${item.img
-            ? `<img src="${item.img}" alt="${escapeHtml(item.name)}">`
+            ? `<img src="${escapeHtml(item.img)}" alt="${escapeHtml(item.name)}">`
             : '<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#art-teapot"/></svg>'}
         </div>
         <div class="cart-item__info">
@@ -908,7 +990,7 @@
     const list = [];
     CATEGORIES.forEach(cat => {
       if (state.deliveryCat !== 'all' && state.deliveryCat !== cat.id) return;
-      cat.products.forEach(p => list.push({ ...p, cat: cat.name }));
+      cat.products.filter(p => p.listed !== false).forEach(p => list.push({ ...p, cat: cat.name }));
     });
     return list;
   }
@@ -933,18 +1015,18 @@
       const badge = badges[i % badges.length];
       const art = p.cat === '清润冷萃' || p.cat === '鲜果调茶' ? 'art-top-cup' : 'art-teapot';
       return `
-        <article class="d-card" data-pid="${p.id}" style="--d:${Math.min(i, 10) * 45}ms" tabindex="0" role="button" aria-label="选购${p.name}">
+        <article class="d-card" data-pid="${escapeHtml(p.id)}" style="--d:${Math.min(i, 10) * 45}ms" tabindex="0" role="button" aria-label="选购${escapeHtml(p.name)}">
           <div class="d-card__art">
             ${p.img
-              ? `<img src="${p.img}" alt="${p.name}" loading="lazy">`
+              ? `<img src="${escapeHtml(p.img)}" alt="${escapeHtml(p.name)}" loading="lazy">`
               : `<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#${art}"/></svg>`}
             ${badge ? `<span class="d-card__badge">${badge}</span>` : ''}
           </div>
-          <h4>${p.name}</h4>
-          <p>${p.desc}</p>
+          <h4>${escapeHtml(p.name)}</h4>
+          <p>${escapeHtml(p.desc)}</p>
           <div class="d-card__foot">
             <span class="d-card__price">${p.price}</span>
-            <button class="d-card__add press" data-dadd="${p.id}" data-qty="${qtyOf(p.id)}" aria-label="将 ${p.name} 加入茶篮">
+            <button class="d-card__add press" data-dadd="${escapeHtml(p.id)}" data-qty="${qtyOf(p.id)}" aria-label="将 ${escapeHtml(p.name)} 加入茶篮">
               <svg class="ic"><use href="#i-plus"/></svg>
             </button>
           </div>
@@ -1609,7 +1691,14 @@
 
   function reorder(order) {
     if (!order) return;
+    let added = 0;
+    let skipped = 0;
     order.items.forEach(item => {
+      const product = PRODUCT_INDEX.get(item.id);
+      if (!product || product.listed === false) {
+        skipped += item.qty;
+        return;
+      }
       const addons = item.addons && item.addons.length ? item.addons.slice() : [];
       const key = cartKey(item.id, item.temp, item.sugar, item.size, addons);
       const currentItem = state.cart.get(key);
@@ -1618,12 +1707,17 @@
         size: item.size || '', addons,
         qty: (currentItem ? currentItem.qty : 0) + item.qty
       });
+      added += item.qty;
     });
+    if (!added) {
+      toast('订单中的商品已下架，暂时无法再来一单');
+      return;
+    }
     updateCartUI();
     go('menu');
     renderCart();
     setTimeout(openCart, 320);
-    toast('已为您重新加入茶篮');
+    toast(skipped ? `已加入茶篮，并跳过 ${skipped} 件下架商品` : '已为您重新加入茶篮');
   }
 
   async function copyText(text, message) {
@@ -1790,6 +1884,229 @@
     go('rights');
   }
 
+  /* ---------------- 商品与库存管理 ---------------- */
+  function saveAdminData() {
+    try {
+      localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify({
+        overrides: adminData.overrides,
+        custom: adminData.custom
+      }));
+      return true;
+    } catch (error) {
+      toast('本地保存失败，本次操作仅在当前页面有效');
+      return false;
+    }
+  }
+
+  function renderAdmin() {
+    const products = [...PRODUCT_INDEX.values()];
+    const query = state.adminSearch.trim().toLowerCase();
+    const list = products.filter(p => {
+      if (state.adminFilter === 'listed' && p.listed === false) return false;
+      if (state.adminFilter === 'unlisted' && p.listed !== false) return false;
+      return !query || `${p.name} ${p.desc} ${p.cat}`.toLowerCase().includes(query);
+    });
+
+    $('#adminTotalCount').textContent = products.length;
+    $('#adminListedCount').textContent = products.filter(p => p.listed !== false).length;
+    $('#adminStockTotal').textContent = products.reduce((sum, p) => sum + p.stock, 0);
+    $('#adminResultCount').textContent = `${list.length} 款商品`;
+    const search = $('#adminSearch');
+    if (search.value !== state.adminSearch) search.value = state.adminSearch;
+    $$('[data-admin-filter]', $('#adminFilters')).forEach(btn => {
+      const active = btn.dataset.adminFilter === state.adminFilter;
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
+
+    if (!list.length) {
+      $('#adminList').innerHTML = `
+        <div class="admin-empty">
+          <svg class="ic"><use href="#i-search"/></svg>
+          <b>没有找到相关商品</b>
+          <p>换个关键词或上架状态试试</p>
+        </div>`;
+      return;
+    }
+
+    $('#adminList').innerHTML = list.map((p, index) => {
+      const listed = p.listed !== false;
+      const art = p.catId === 'fruit' || p.catId === 'cold' ? 'art-top-cup' : 'art-teapot';
+      return `
+        <article class="admin-product${listed ? '' : ' is-unlisted'}" data-admin-product="${escapeHtml(p.id)}" style="--i:${Math.min(index, 12)}">
+          <div class="admin-product__main">
+            <div class="admin-product__art">
+              ${p.img
+                ? `<img src="${escapeHtml(p.img)}" alt="${escapeHtml(p.name)}" loading="lazy">`
+                : `<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#${art}"/></svg>`}
+            </div>
+            <div class="admin-product__body">
+              <div class="admin-product__title">
+                <h3>${escapeHtml(p.name)}</h3>
+                <span class="admin-status${listed ? ' is-listed' : ''}">${listed ? '已上架' : '已下架'}</span>
+              </div>
+              <p>${escapeHtml(p.cat)} · ¥${p.price}</p>
+              <small>${escapeHtml(p.desc)}</small>
+            </div>
+            <button class="admin-list-toggle press${listed ? ' is-on' : ''}" type="button" data-admin-list="${escapeHtml(p.id)}" aria-pressed="${listed}" aria-label="${listed ? '下架' : '上架'}${escapeHtml(p.name)}">
+              <span></span><b>${listed ? '下架' : '上架'}</b>
+            </button>
+          </div>
+          <div class="admin-stock">
+            <div class="admin-stock__count"><span>当前库存</span><strong>${p.stock}</strong><small>件</small></div>
+            <label class="admin-stock__input">
+              <span>操作数量</span>
+              <input type="number" inputmode="numeric" min="1" step="1" value="1" data-stock-qty aria-label="${escapeHtml(p.name)}出入库数量">
+            </label>
+            <div class="admin-stock__actions">
+              <button class="admin-stock__btn admin-stock__btn--out press" type="button" data-admin-stock="out" data-id="${escapeHtml(p.id)}"><svg class="ic"><use href="#i-minus"/></svg>出库</button>
+              <button class="admin-stock__btn admin-stock__btn--in press" type="button" data-admin-stock="in" data-id="${escapeHtml(p.id)}"><svg class="ic"><use href="#i-plus"/></svg>入库</button>
+            </div>
+          </div>
+        </article>`;
+    }).join('');
+  }
+
+  function toggleAdminForm(show) {
+    const form = $('#adminProductForm');
+    form.hidden = !show;
+    $('#adminAddToggle').setAttribute('aria-expanded', String(show));
+    $('#adminFormError').textContent = '';
+    if (show) {
+      setTimeout(() => {
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        $('#adminProductName').focus({ preventScroll: true });
+      }, 60);
+    } else {
+      form.reset();
+      $('#adminProductStock').value = '0';
+    }
+  }
+
+  function refreshCustomerProducts() {
+    renderProducts();
+    renderDeliveryGrid();
+    updateCartUI();
+    if (sheets.cart.classList.contains('is-open')) renderCart();
+  }
+
+  function cleanupUnlistedItems() {
+    [...state.cart.entries()].forEach(([key, item]) => {
+      const product = PRODUCT_INDEX.get(item.id);
+      if (!product || product.listed === false) state.cart.delete(key);
+    });
+
+    const draft = state.paymentDraft;
+    if (!draft) return;
+    draft.entries = draft.entries.filter(item => {
+      const product = PRODUCT_INDEX.get(item.id);
+      return product && product.listed !== false;
+    });
+    draft.subtotal = draft.entries.reduce((sum, item) => sum + item.price * item.qty, 0);
+    if (draft.modeKey === 'delivery') {
+      draft.deliveryFee = !draft.entries.length || draft.subtotal >= FREE_DELIVERY_LIMIT ? 0 : DELIVERY_FEE;
+      draft.packFee = draft.entries.length ? PACK_FEE : 0;
+      draft.activityDiscount = draft.entries.length ? NEW_USER_OFF : 0;
+    }
+    if (!draft.entries.length) {
+      const from = draft.from || 'menu';
+      state.paymentDraft = null;
+      if (current === 'payment') go(from);
+      return;
+    }
+    recalculateDraft();
+    if (current === 'payment') {
+      renderPayment();
+      renderPaymentCouponList();
+    }
+  }
+
+  function setProductListed(id) {
+    const product = PRODUCT_INDEX.get(id);
+    if (!product) return;
+    const listed = product.listed === false;
+    adminData.overrides[id] = { listed, stock: product.stock };
+    rebuildProductIndex();
+    if (!listed) cleanupUnlistedItems();
+    refreshCustomerProducts();
+    renderAdmin();
+    if (saveAdminData()) toast(listed ? `「${product.name}」已上架` : `「${product.name}」已下架，顾客端已同步隐藏`);
+  }
+
+  function adjustProductStock(id, rawValue, direction, input) {
+    const product = PRODUCT_INDEX.get(id);
+    if (!product) return;
+    const raw = String(rawValue).trim();
+    const quantity = Number(raw);
+    if (!/^[1-9]\d*$/.test(raw) || !Number.isSafeInteger(quantity)) {
+      input.classList.add('is-error');
+      input.focus();
+      input.select();
+      toast('请输入大于 0 的整数数量');
+      return;
+    }
+    if (direction === 'out' && quantity > product.stock) {
+      input.classList.add('is-error');
+      input.focus();
+      input.select();
+      toast(`出库数量不能超过当前库存 ${product.stock} 件`);
+      return;
+    }
+    const stock = direction === 'in' ? product.stock + quantity : product.stock - quantity;
+    if (!Number.isSafeInteger(stock) || stock < 0) {
+      toast('库存数量超出可处理范围');
+      return;
+    }
+    adminData.overrides[id] = { listed: product.listed !== false, stock };
+    rebuildProductIndex();
+    renderAdmin();
+    if (saveAdminData()) toast(`「${product.name}」已${direction === 'in' ? '入库' : '出库'} ${quantity} 件，现有库存 ${stock} 件`);
+  }
+
+  function addAdminProduct() {
+    const name = $('#adminProductName').value.trim();
+    const catId = $('#adminProductCategory').value;
+    const priceRaw = $('#adminProductPrice').value.trim();
+    const stockRaw = $('#adminProductStock').value.trim();
+    const imageRaw = $('#adminProductImage').value.trim();
+    const desc = $('#adminProductDesc').value.trim();
+    const category = CATEGORIES.find(cat => cat.id === catId);
+    const price = Number(priceRaw);
+    const stock = Number(stockRaw);
+    const img = safeProductImage(imageRaw);
+    let error = '';
+    if (!name) error = '请填写产品名称';
+    else if (!category) error = '请选择有效的产品分类';
+    else if (!/^\d+(\.\d{1,2})?$/.test(priceRaw) || !Number.isFinite(price) || price <= 0 || price > 9999) error = '请输入 0.01 至 9999 元的销售价格，最多两位小数';
+    else if (!/^(0|[1-9]\d*)$/.test(stockRaw) || !Number.isSafeInteger(stock)) error = '初始库存须为大于或等于 0 的整数';
+    else if (imageRaw && !img) error = '图片地址仅支持 HTTP、HTTPS 或项目 assets 资源路径';
+    if (error) {
+      $('#adminFormError').textContent = error;
+      return;
+    }
+
+    let id = '';
+    do {
+      id = `custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+    } while (PRODUCT_INDEX.has(id));
+    const product = {
+      id, catId, name: name.slice(0, 24),
+      desc: desc.slice(0, 80) || '门店新制茶品，欢迎品尝',
+      price: Math.round(price * 100) / 100,
+      img, custom: true
+    };
+    adminData.custom.push(product);
+    category.products.push({ ...product });
+    adminData.overrides[id] = { listed: true, stock };
+    rebuildProductIndex();
+    state.adminFilter = 'all';
+    state.adminSearch = '';
+    toggleAdminForm(false);
+    renderAdmin();
+    refreshCustomerProducts();
+    if (saveAdminData()) toast(`「${product.name}」已添加并上架`);
+  }
+
   function claimCoupon(id) {
     const coupon = state.coupons.find(item => item.id === id);
     if (!coupon || coupon.status !== 'claimable') return;
@@ -1936,7 +2253,11 @@
         .filter(Boolean).join(' · ');
       return `
         <div class="order-good">
-          <div class="order-good__thumb"><img src="${escapeHtml(product?.img || '')}" alt="${escapeHtml(item.name)}"></div>
+          <div class="order-good__thumb">
+            ${product && product.img
+              ? `<img src="${escapeHtml(product.img)}" alt="${escapeHtml(item.name)}">`
+              : '<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#art-teapot"/></svg>'}
+          </div>
           <div class="order-good__body"><h4>${escapeHtml(item.name)}</h4><p>${escapeHtml(specs)}</p></div>
           <div class="order-good__price"><b>¥${formatMoney(item.price * item.qty)}</b><small>×${item.qty}</small></div>
         </div>`;
@@ -2679,6 +3000,45 @@
     });
     $('#rightsOpenCoupons').addEventListener('click', () => openCoupons('rights'));
 
+    // 商品与库存管理
+    $('#adminBack').addEventListener('click', () => go('profile'));
+    $('#adminAddToggle').addEventListener('click', () => {
+      toggleAdminForm($('#adminProductForm').hidden);
+    });
+    $('#adminFormCancel').addEventListener('click', () => toggleAdminForm(false));
+    $('#adminProductForm').addEventListener('submit', e => {
+      e.preventDefault();
+      addAdminProduct();
+    });
+    $('#adminProductForm').addEventListener('input', () => {
+      $('#adminFormError').textContent = '';
+    });
+    $('#adminSearch').addEventListener('input', e => {
+      state.adminSearch = e.target.value;
+      renderAdmin();
+    });
+    $('#adminFilters').addEventListener('click', e => {
+      const btn = e.target.closest('[data-admin-filter]');
+      if (!btn) return;
+      state.adminFilter = btn.dataset.adminFilter;
+      renderAdmin();
+    });
+    $('#adminList').addEventListener('click', e => {
+      const listBtn = e.target.closest('[data-admin-list]');
+      if (listBtn) {
+        setProductListed(listBtn.dataset.adminList);
+        return;
+      }
+      const stockBtn = e.target.closest('[data-admin-stock]');
+      if (!stockBtn) return;
+      const card = stockBtn.closest('[data-admin-product]');
+      const input = $('[data-stock-qty]', card);
+      adjustProductStock(stockBtn.dataset.id, input.value, stockBtn.dataset.adminStock, input);
+    });
+    $('#adminList').addEventListener('input', e => {
+      if (e.target.matches('[data-stock-qty]')) e.target.classList.remove('is-error');
+    });
+
     // 我的
     loginBtn.addEventListener('click', login);
     $('#memberCodeBtn').addEventListener('click', () => openSheet('member'));
@@ -2695,6 +3055,11 @@
         }
         if (key === 'rights') {
           openRights();
+          return;
+        }
+        if (key === 'admin') {
+          closeSheets();
+          go('admin');
           return;
         }
         const messages = {
@@ -2842,6 +3207,7 @@
     renderOrders();
     renderCoupons();
     renderRightsAsset();
+    renderAdmin();
     updateModeUI();
     syncStoreHeader();
     updateTabs();
