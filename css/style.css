@@ -747,6 +747,7 @@ svg{display:block;}
   background:radial-gradient(circle at 50% 44%, #EFF2E0 0%, #E4E8D0 100%);
 }
 .d-card__art svg{width:74px;height:74px;transition:transform .5s var(--ease-out);}
+.d-card__art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s var(--ease-out);}
 .d-card__badge{
   position:absolute;top:7px;left:7px;padding:2px 7px;border-radius:999px;
   font-size:8px;letter-spacing:.08em;color:#EFF1DF;background:rgba(47,58,28,.9);
@@ -778,6 +779,7 @@ svg{display:block;}
 @media (hover:hover){
   .d-card:hover{transform:translateY(-3px);box-shadow:inset 0 0 0 1px rgba(47,58,28,.08), 0 24px 34px -28px rgba(47,58,28,.9);}
   .d-card:hover .d-card__art svg{transform:scale(1.06) rotate(-2deg);}
+  .d-card:hover .d-card__art img{transform:scale(1.06);}
 }
 @keyframes dCardIn{from{opacity:0;transform:translateY(14px) scale(.98);}to{opacity:1;transform:none;}}
 @keyframes dAddPop{0%{transform:scale(.8);}55%{transform:scale(1.18);}100%{transform:scale(1);}}

@@ -784,7 +784,9 @@
       return `
         <article class="d-card" style="--d:${Math.min(i, 10) * 45}ms">
           <div class="d-card__art">
-            <svg viewBox="0 0 120 120" aria-hidden="true"><use href="#${art}"/></svg>
+            ${p.img
+              ? `<img src="${p.img}" alt="${p.name}" loading="lazy">`
+              : `<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#${art}"/></svg>`}
             ${badge ? `<span class="d-card__badge">${badge}</span>` : ''}
           </div>
           <h4>${p.name}</h4>
