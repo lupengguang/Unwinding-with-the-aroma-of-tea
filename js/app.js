@@ -782,7 +782,7 @@
       const badge = badges[i % badges.length];
       const art = p.cat === '清润冷萃' || p.cat === '鲜果调茶' ? 'art-top-cup' : 'art-teapot';
       return `
-        <article class="d-card" style="--d:${Math.min(i, 10) * 45}ms">
+        <article class="d-card" data-pid="${p.id}" style="--d:${Math.min(i, 10) * 45}ms" tabindex="0" role="button" aria-label="选购${p.name}">
           <div class="d-card__art">
             ${p.img
               ? `<img src="${p.img}" alt="${p.name}" loading="lazy">`
@@ -1595,10 +1595,17 @@
       deliveryGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
     deliveryGrid.addEventListener('click', e => {
-      const btn = e.target.closest('[data-dadd]');
-      if (!btn) return;
-      addToCart(btn.dataset.dadd, null, 1, btn, $('#deliveryCartBtn'));
-      updateDeliveryBadges();
+      const addBtn = e.target.closest('[data-dadd]');
+      if (addBtn) { openProduct(addBtn.dataset.dadd, 'delivery'); return; }
+      const card = e.target.closest('.d-card');
+      if (card && card.dataset.pid) openProduct(card.dataset.pid, 'delivery');
+    });
+    deliveryGrid.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const card = e.target.closest('.d-card');
+      if (!card || !card.dataset.pid) return;
+      e.preventDefault();
+      openProduct(card.dataset.pid, 'delivery');
     });
     etaChips.addEventListener('click', e => {
       const btn = e.target.closest('[data-eta]');
