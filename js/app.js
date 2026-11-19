@@ -124,6 +124,29 @@
     cold: ['多糖', '正常糖', '少糖', '无糖'],
     snack: []
   };
+  const CAT_SIZES = {
+    season: ['中杯 500ml', '大杯 700ml'],
+    fruit: ['中杯 500ml', '大杯 700ml'],
+    milk: ['中杯 500ml', '大杯 700ml'],
+    cold: ['中杯 500ml', '大杯 700ml'],
+    snack: []
+  };
+  const SIZE_PRICES = { '中杯 500ml': 0, '大杯 700ml': 2 };
+  const CAT_ADDONS = {
+    season: [],
+    fruit: ['珍珠 +3', '奶盖 +4', '椰果 +3'],
+    milk: ['珍珠 +3', '奶盖 +4', '椰果 +3'],
+    cold: ['椰果 +3'],
+    snack: []
+  };
+  const ADDON_PRICES = { '珍珠': 3, '奶盖': 4, '椰果': 3 };
+  const CAT_INFO = {
+    season: { origin: '武夷山 / 白毫银针 / 西湖龙井', taste: '原叶纯茶 · 清香回甘', allergen: '无', kcal: 5 },
+    fruit: { origin: '产地直采鲜果 · 当季鲜榨', taste: '果香饱满 · 微酸回甘', allergen: '含果肉，鲜果过敏者慎饮', kcal: 85 },
+    milk: { origin: '轻乳基底 · 现萃茶底', taste: '茶香在前 · 奶香在后', allergen: '含乳制品，乳糖不耐者慎饮', kcal: 120 },
+    cold:  { origin: '低温冷萃 8 小时', taste: '冰爽清冽 · 茶味集中', allergen: '无', kcal: 45 },
+    snack: { origin: '中式手工茶点', taste: '现制现售 · 茶佐佳品', allergen: '含面粉、乳制品、坚果', kcal: 180 }
+  };
   const CAT_KICKER = {
     season: 'SEASONAL TEA COLLECTION',
     fruit: 'FRESH FRUIT TEA',
@@ -133,10 +156,20 @@
   };
 
   const PRODUCT_INDEX = new Map();
-  CATEGORIES.forEach(cat => cat.products.forEach(p => PRODUCT_INDEX.set(p.id, {
-    ...p, cat: cat.name, catId: cat.id,
-    temps: CAT_TEMPS[cat.id] || [], sugars: CAT_SUGARS[cat.id] || []
-  })));
+  CATEGORIES.forEach(cat => cat.products.forEach(p => {
+    const info = CAT_INFO[cat.id] || {};
+    PRODUCT_INDEX.set(p.id, {
+      ...p, cat: cat.name, catId: cat.id,
+      temps: CAT_TEMPS[cat.id] || [],
+      sugars: CAT_SUGARS[cat.id] || [],
+      sizes: CAT_SIZES[cat.id] || [],
+      addons: CAT_ADDONS[cat.id] || [],
+      origin: p.origin || info.origin || '',
+      taste: p.taste || info.taste || '',
+      allergen: p.allergen || info.allergen || '',
+      kcal: p.kcal != null ? p.kcal : (info.kcal != null ? info.kcal : 0)
+    });
+  }));
 
   /* ---------------- 门店数据 ---------------- */
   const STORE_REGIONS = [
@@ -205,6 +238,8 @@
     productId: null,
     productTemp: '',
     productSugar: '',
+    productSize: '',
+    productAddons: [],
     productQty: 1,
     productFrom: 'menu'
   };
@@ -527,13 +562,30 @@
   }
 
   /* ---------------- 茶篮 ---------------- */
-  const cartKey = (id, temp, sugar) => `${id}|${temp || ''}|${sugar || ''}`;
+  const cartKey = (id, temp, sugar, size, addons) => {
+    const a = (addons && addons.length) ? addons.slice().sort().join('+') : '';
+    return `${id}|${temp || ''}|${sugar || ''}|${size || ''}|${a}`;
+  };
+  function formatAddonName(raw) { return (raw || '').replace(/\s*\+\d+$/, '').trim(); }
+  function addonPrice(raw) {
+    const m = (raw || '').match(/\+(\d+)\s*$/); return m ? Number(m[1]) : 0;
+  }
+  function priceOfItem(id, temp, sugar, size, addons) {
+    const p = PRODUCT_INDEX.get(id); if (!p) return 0;
+    const base = p.price;
+    const sizeUp = SIZE_PRICES[size] || 0;
+    const addUp = (addons || []).reduce((s, a) => s + addonPrice(a), 0);
+    return base + sizeUp + addUp;
+  }
 
   function getEntries() {
     return [...state.cart.entries()]
       .map(([key, item]) => {
         const p = PRODUCT_INDEX.get(item.id);
-        return p ? { ...p, qty: item.qty, temp: item.temp, sugar: item.sugar || '', key } : null;
+        if (!p) return null;
+        const price = priceOfItem(item.id, item.temp, item.sugar, item.size, item.addons);
+        return { ...p, qty: item.qty, temp: item.temp, sugar: item.sugar || '',
+                 size: item.size || '', addons: item.addons || [], price, key };
       })
       .filter(Boolean);
   }
@@ -549,22 +601,25 @@
     return getEntries().reduce((sum, item) => sum + item.price * item.qty, 0);
   }
 
-  function addToCart(id, temp, qty, btn, flyTarget, sugar) {
+  function addToCart(id, temp, qty, btn, flyTarget, sugar, size, addons) {
     const p = PRODUCT_INDEX.get(id);
     if (!p) return;
     const t = temp || (p.temps && p.temps[0]) || '';
     const s = sugar || (p.sugars && p.sugars.includes('正常糖') ? '正常糖' : (p.sugars && p.sugars[0])) || '';
-    const key = cartKey(id, t, s);
+    const sz = size || (p.sizes && p.sizes[0]) || '';
+    const ad = addons && addons.length ? addons.slice() : [];
+    const key = cartKey(id, t, s, sz, ad);
     const cur = state.cart.get(key);
     const amount = Math.max(1, Number(qty) || 1);
-    state.cart.set(key, { id, temp: t, sugar: s, qty: (cur ? cur.qty : 0) + amount });
+    state.cart.set(key, { id, temp: t, sugar: s, size: sz, addons: ad, qty: (cur ? cur.qty : 0) + amount });
     updateCartUI();
     if (btn) {
       btn.classList.add('is-added');
       setTimeout(() => btn.classList.remove('is-added'), 430);
       flyToCart(btn, flyTarget);
     }
-    toast(`${p.name}${t ? `（${t}${s ? ` · ${s}` : ''}）` : ''} 已加入茶篮`);
+    const tag = [t, s, sz, ad.length ? ad.map(formatAddonName).join('+') : ''].filter(Boolean).join(' · ');
+    toast(`${p.name}${tag ? `（${tag}）` : ''} 已加入茶篮`);
   }
 
   function setQty(key, delta) {
@@ -588,6 +643,15 @@
   const productTempsEl = $('#productTemps');
   const productSugarBox = $('#productSugarBox');
   const productSugarsEl = $('#productSugars');
+  const productSizeBox = $('#productSizeBox');
+  const productSizesEl = $('#productSizes');
+  const productAddonsBox = $('#productAddonsBox');
+  const productAddonsEl = $('#productAddons');
+  const productInfoBox = $('#productInfoBox');
+  const productOriginEl = $('#productOrigin');
+  const productTasteEl = $('#productTaste');
+  const productAllergenEl = $('#productAllergen');
+  const productKcalEl = $('#productKcal');
   const productQtyEl = $('#productQty');
   const productTotalEl = $('#productTotal');
 
@@ -620,14 +684,41 @@
       <button class="prod-chip${s === state.productSugar ? ' is-active' : ''}"
               data-sugar="${s}" aria-pressed="${s === state.productSugar}">${s}</button>
     `).join('');
+
+    const sizes = p.sizes || [];
+    productSizeBox.hidden = sizes.length === 0;
+    productSizesEl.innerHTML = sizes.map(sz => {
+      const up = SIZE_PRICES[sz] || 0;
+      const label = up ? `${sz} +¥${up}` : sz;
+      return `<button class="prod-chip${sz === state.productSize ? ' is-active' : ''}"
+              data-size="${sz}" aria-pressed="${sz === state.productSize}">${label}</button>`;
+    }).join('');
+
+    const addons = p.addons || [];
+    productAddonsBox.hidden = addons.length === 0;
+    productAddonsEl.innerHTML = addons.map(a => {
+      const selected = state.productAddons.includes(a);
+      return `<button class="prod-chip${selected ? ' is-active' : ''}"
+              data-addon="${a}" aria-pressed="${selected}">${a}</button>`;
+    }).join('');
+
+    // 产品信息
+    productOriginEl.textContent = p.origin || '—';
+    productTasteEl.textContent = p.taste || '—';
+    productAllergenEl.textContent = p.allergen || '—';
+    productKcalEl.textContent = p.kcal || '—';
+
     syncProductTotal();
   }
 
   function syncProductTotal() {
     const p = PRODUCT_INDEX.get(state.productId);
     if (!p) return;
+    const sizeUp = SIZE_PRICES[state.productSize] || 0;
+    const addUp = (state.productAddons || []).reduce((s, a) => s + addonPrice(a), 0);
+    const unit = p.price + sizeUp + addUp;
     productQtyEl.textContent = state.productQty;
-    productTotalEl.textContent = `¥${p.price * state.productQty}`;
+    productTotalEl.textContent = `¥${unit * state.productQty}`;
   }
 
   function openProduct(id, from) {
@@ -636,6 +727,8 @@
     state.productId = id;
     state.productTemp = (p.temps && p.temps[0]) || '';
     state.productSugar = (p.sugars && p.sugars.includes('正常糖')) ? '正常糖' : ((p.sugars && p.sugars[0]) || '');
+    state.productSize = (p.sizes && p.sizes[0]) || '';
+    state.productAddons = [];
     state.productQty = 1;
     state.productFrom = from || (current === 'delivery' ? 'delivery' : 'menu');
     renderProduct();
@@ -664,7 +757,12 @@
 
   function renderCart() {
     const entries = getEntries();
-    cartList.innerHTML = entries.map(item => `
+    cartList.innerHTML = entries.map(item => {
+      const tags = [item.temp, item.sugar, item.size,
+                    ...(item.addons && item.addons.length
+                      ? item.addons.map(formatAddonName) : [])]
+        .filter(Boolean).map(t => `<em class="cart-item__temp">${escapeHtml(t)}</em>`).join('');
+      return `
       <div class="cart-item">
         <div class="cart-item__thumb">
           ${item.img
@@ -672,7 +770,7 @@
             : '<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#art-teapot"/></svg>'}
         </div>
         <div class="cart-item__info">
-          <h4>${escapeHtml(item.name)}${item.temp ? `<em class="cart-item__temp">${escapeHtml(item.temp)}</em>` : ''}${item.sugar ? `<em class="cart-item__temp">${escapeHtml(item.sugar)}</em>` : ''}</h4>
+          <h4>${escapeHtml(item.name)}${tags}</h4>
           <span>${escapeHtml(item.desc)}</span>
         </div>
         <div class="stepper">
@@ -681,8 +779,8 @@
           <button data-step="1" data-key="${item.key}" aria-label="增加一份"><svg class="ic"><use href="#i-plus"/></svg></button>
         </div>
         <div class="cart-item__price">¥${item.price * item.qty}</div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
     updateCartUI();
   }
 
@@ -907,12 +1005,17 @@
       <svg class="ic"><use href="#i-pin"/></svg>
       <div><b>配送到${escapeHtml(a.tag)}</b><p>${escapeHtml(a.addr)}<br>${escapeHtml(a.contact)}</p></div>
     `;
-    deliveryItems.innerHTML = entries.map(item => `
+    deliveryItems.innerHTML = entries.map(item => {
+      const tgs = [item.temp, item.sugar, item.size,
+                   ...(item.addons && item.addons.length
+                     ? item.addons.map(formatAddonName) : [])]
+        .filter(Boolean).map(t => `<i class="d-item__temp">${escapeHtml(t)}</i>`).join('');
+      return `
       <div class="d-item">
-        <span>${escapeHtml(item.name)}${item.temp ? `<i class="d-item__temp">${escapeHtml(item.temp)}</i>` : ''}${item.sugar ? `<i class="d-item__temp">${escapeHtml(item.sugar)}</i>` : ''}<small>×${item.qty}</small></span>
+        <span>${escapeHtml(item.name)}${tgs}<small>×${item.qty}</small></span>
         <b>¥${item.price * item.qty}</b>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
     feeSubtotal.textContent = `¥${sub}`;
     feeDelivery.textContent = fee === 0 ? '免配送费' : `¥${fee}`;
     feeOff.textContent = off ? `-¥${off}` : '¥0';
@@ -1146,7 +1249,11 @@
     const order = {
       id: Date.now(),
       no: `QM ${y}${mo}${da} ${hh}${mm}${mins}`,
-      items: entries.map(e => ({ id: e.id, name: e.name, price: e.price, qty: e.qty, temp: e.temp || '', sugar: e.sugar || '' })),
+      items: entries.map(e => ({
+        id: e.id, name: e.name, price: e.price, qty: e.qty,
+        temp: e.temp || '', sugar: e.sugar || '',
+        size: e.size || '', addons: e.addons || []
+      })),
       total: totalOverride == null ? entries.reduce((s, e) => s + e.price * e.qty, 0) : totalOverride,
       mode: modeLabel(),
       time: `今日 ${hh}:${mm}`,
@@ -1166,12 +1273,17 @@
   }
 
   function orderCardHTML(order) {
-    const lines = order.items.map(item => `
+    const lines = order.items.map(item => {
+      const tgs = [item.temp, item.sugar, item.size,
+                   ...(item.addons && item.addons.length
+                     ? item.addons.map(formatAddonName) : [])]
+        .filter(Boolean).map(t => `<small class="order-line__temp">${escapeHtml(t)}</small>`).join('');
+      return `
       <div class="order-line">
-        <span class="order-line__name">${escapeHtml(item.name)}${item.temp ? `<small class="order-line__temp">${escapeHtml(item.temp)}</small>` : ''}${item.sugar ? `<small class="order-line__temp">${escapeHtml(item.sugar)}</small>` : ''}<small>×${item.qty}</small></span>
+        <span class="order-line__name">${escapeHtml(item.name)}${tgs}<small>×${item.qty}</small></span>
         <span class="order-line__price">¥${item.price * item.qty}</span>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
     const ready = order.status === 'ready';
     const isDelivery = order.mode === '配送到家';
     const statusText = isDelivery ? (ready ? '配送中' : '备茶中') : (ready ? '待取茶' : '制作中');
@@ -1784,9 +1896,14 @@
       const order = state.orders.find(o => String(o.id) === btn.dataset.again);
       if (!order) return;
       order.items.forEach(item => {
-        const key = cartKey(item.id, item.temp, item.sugar);
+        const addons = item.addons && item.addons.length ? item.addons.slice() : [];
+        const key = cartKey(item.id, item.temp, item.sugar, item.size, addons);
         const cur = state.cart.get(key);
-        state.cart.set(key, { id: item.id, temp: item.temp || '', sugar: item.sugar || '', qty: (cur ? cur.qty : 0) + item.qty });
+        state.cart.set(key, {
+          id: item.id, temp: item.temp || '', sugar: item.sugar || '',
+          size: item.size || '', addons,
+          qty: (cur ? cur.qty : 0) + item.qty
+        });
       });
       updateCartUI();
       go('menu');
@@ -1846,6 +1963,27 @@
         el.setAttribute('aria-pressed', String(on));
       });
     });
+    productSizesEl.addEventListener('click', e => {
+      const chip = e.target.closest('[data-size]');
+      if (!chip) return;
+      state.productSize = chip.dataset.size;
+      $$('[data-size]', productSizesEl).forEach(el => {
+        const on = el.dataset.size === state.productSize;
+        el.classList.toggle('is-active', on);
+        el.setAttribute('aria-pressed', String(on));
+      });
+      syncProductTotal();
+    });
+    productAddonsEl.addEventListener('click', e => {
+      const chip = e.target.closest('[data-addon]');
+      if (!chip) return;
+      const a = chip.dataset.addon;
+      const idx = state.productAddons.indexOf(a);
+      if (idx >= 0) state.productAddons.splice(idx, 1); else state.productAddons.push(a);
+      chip.classList.toggle('is-active', idx < 0);
+      chip.setAttribute('aria-pressed', String(idx < 0));
+      syncProductTotal();
+    });
     $('.prod-qty').addEventListener('click', e => {
       const btn = e.target.closest('[data-pqty]');
       if (!btn) return;
@@ -1861,7 +1999,8 @@
       if (!p) return;
       btn.classList.add('is-busy');
       btn.textContent = '已加入茶篮';
-      addToCart(state.productId, state.productTemp, state.productQty, null, null, state.productSugar);
+      addToCart(state.productId, state.productTemp, state.productQty, null, null,
+                state.productSugar, state.productSize, state.productAddons);
       setTimeout(() => {
         btn.classList.remove('is-busy');
         btn.textContent = '加入茶篮';
