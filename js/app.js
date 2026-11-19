@@ -11,10 +11,12 @@
     splash: $('#screen-splash'),
     home: $('#screen-home'),
     menu: $('#screen-menu'),
+    product: $('#screen-product'),
     orders: $('#screen-orders'),
     profile: $('#screen-profile'),
     login: $('#screen-login'),
     register: $('#screen-register'),
+    about: $('#screen-about'),
     delivery: $('#screen-delivery')
   };
   const TAB_ORDER = ['home', 'menu', 'orders', 'profile'];
@@ -108,8 +110,33 @@
     }
   ];
 
+  const CAT_TEMPS = {
+    season: ['热饮'],
+    fruit: ['热饮', '冰饮', '少冰', '去冰'],
+    milk: ['热饮', '冰饮', '少冰', '去冰'],
+    cold: ['冰饮', '少冰', '去冰'],
+    snack: []
+  };
+  const CAT_SUGARS = {
+    season: [],
+    fruit: ['多糖', '正常糖', '少糖', '无糖'],
+    milk: ['多糖', '正常糖', '少糖', '无糖'],
+    cold: ['多糖', '正常糖', '少糖', '无糖'],
+    snack: []
+  };
+  const CAT_KICKER = {
+    season: 'SEASONAL TEA COLLECTION',
+    fruit: 'FRESH FRUIT TEA',
+    milk: 'LIGHT MILK TEA',
+    cold: 'COLD BREW TEA',
+    snack: 'TEA SNACKS'
+  };
+
   const PRODUCT_INDEX = new Map();
-  CATEGORIES.forEach(cat => cat.products.forEach(p => PRODUCT_INDEX.set(p.id, { ...p, cat: cat.name })));
+  CATEGORIES.forEach(cat => cat.products.forEach(p => PRODUCT_INDEX.set(p.id, {
+    ...p, cat: cat.name, catId: cat.id,
+    temps: CAT_TEMPS[cat.id] || [], sugars: CAT_SUGARS[cat.id] || []
+  })));
 
   /* ---------------- 门店数据 ---------------- */
   const STORE_REGIONS = [
@@ -174,7 +201,12 @@
     deliveryCat: 'all',
     deliveryEta: 'asap',
     deliveryFrom: 'home',
-    addressId: 'home'
+    addressId: 'home',
+    productId: null,
+    productTemp: '',
+    productSugar: '',
+    productQty: 1,
+    productFrom: 'menu'
   };
 
   /* ---------------- 元素 ---------------- */
@@ -290,6 +322,8 @@
       if (n === 'login') return TAB_ORDER.length;
       if (n === 'register') return TAB_ORDER.length + 1;
       if (n === 'delivery') return TAB_ORDER.length + 2;
+      if (n === 'about') return TAB_ORDER.length + 3;
+      if (n === 'product') return TAB_ORDER.length + 4;
       const i = TAB_ORDER.indexOf(n);
       return i === -1 ? 0 : i;
     };
@@ -360,7 +394,7 @@
       try { inAnim.cancel(); } catch (e) {}
     };
 
-    if (name === 'login' || name === 'register' || name === 'delivery') {
+    if (name === 'login' || name === 'register' || name === 'delivery' || name === 'about' || name === 'product') {
       const sc = $(`[data-scroll="${name}"]`);
       if (sc) sc.scrollTop = 0;
       if (name === 'login' || name === 'register') {
@@ -446,7 +480,7 @@
       return;
     }
     productList.innerHTML = list.map((p, i) => `
-      <article class="product" style="--d:${i * 55}ms">
+      <article class="product" data-pid="${p.id}" style="--d:${i * 55}ms" tabindex="0" role="button" aria-label="选购${p.name}">
         <div class="product__thumb">
           ${p.img
             ? `<img src="${p.img}" alt="${p.name}" loading="lazy">`
@@ -493,37 +527,119 @@
   }
 
   /* ---------------- 茶篮 ---------------- */
+  const cartKey = (id, temp, sugar) => `${id}|${temp || ''}|${sugar || ''}`;
+
   function getEntries() {
     return [...state.cart.entries()]
-      .map(([id, qty]) => ({ ...PRODUCT_INDEX.get(id), qty }))
-      .filter(item => item && item.id);
+      .map(([key, item]) => {
+        const p = PRODUCT_INDEX.get(item.id);
+        return p ? { ...p, qty: item.qty, temp: item.temp, sugar: item.sugar || '', key } : null;
+      })
+      .filter(Boolean);
   }
   function cartCount() {
-    return [...state.cart.values()].reduce((a, b) => a + b, 0);
+    return [...state.cart.values()].reduce((a, b) => a + b.qty, 0);
+  }
+  function qtyOf(id) {
+    return [...state.cart.values()]
+      .filter(v => v.id === id)
+      .reduce((a, b) => a + b.qty, 0);
   }
   function getCartTotal() {
     return getEntries().reduce((sum, item) => sum + item.price * item.qty, 0);
   }
 
-  function addToCart(id, btn, flyTarget) {
+  function addToCart(id, temp, qty, btn, flyTarget, sugar) {
     const p = PRODUCT_INDEX.get(id);
     if (!p) return;
-    state.cart.set(id, (state.cart.get(id) || 0) + 1);
+    const t = temp || (p.temps && p.temps[0]) || '';
+    const s = sugar || (p.sugars && p.sugars.includes('正常糖') ? '正常糖' : (p.sugars && p.sugars[0])) || '';
+    const key = cartKey(id, t, s);
+    const cur = state.cart.get(key);
+    const amount = Math.max(1, Number(qty) || 1);
+    state.cart.set(key, { id, temp: t, sugar: s, qty: (cur ? cur.qty : 0) + amount });
     updateCartUI();
     if (btn) {
       btn.classList.add('is-added');
       setTimeout(() => btn.classList.remove('is-added'), 430);
       flyToCart(btn, flyTarget);
     }
-    toast(`${p.name} 已加入茶篮`);
+    toast(`${p.name}${t ? `（${t}${s ? ` · ${s}` : ''}）` : ''} 已加入茶篮`);
   }
 
-  function setQty(id, delta) {
-    const next = (state.cart.get(id) || 0) + delta;
-    if (next <= 0) state.cart.delete(id);
-    else state.cart.set(id, next);
+  function setQty(key, delta) {
+    const item = state.cart.get(key);
+    if (!item) return;
+    const next = item.qty + delta;
+    if (next <= 0) state.cart.delete(key);
+    else state.cart.set(key, { ...item, qty: next });
     updateCartUI();
     if (sheets.cart.classList.contains('is-open')) renderCart();
+  }
+
+  /* ---------------- 选购页 ---------------- */
+  const productArt = $('#productArt');
+  const productCat = $('#productCat');
+  const productKicker = $('#productKicker');
+  const productName = $('#productName');
+  const productDesc = $('#productDesc');
+  const productPrice = $('#productPrice');
+  const productTempBox = $('#productTempBox');
+  const productTempsEl = $('#productTemps');
+  const productSugarBox = $('#productSugarBox');
+  const productSugarsEl = $('#productSugars');
+  const productQtyEl = $('#productQty');
+  const productTotalEl = $('#productTotal');
+
+  function productArtMarkup(p) {
+    if (p.img) return `<img src="${p.img}" alt="${p.name}">`;
+    const art = p.catId === 'fruit' || p.catId === 'cold' ? 'art-top-cup' : 'art-teapot';
+    return `<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#${art}"/></svg>`;
+  }
+
+  function renderProduct() {
+    const p = PRODUCT_INDEX.get(state.productId);
+    if (!p) return;
+    productArt.innerHTML = productArtMarkup(p);
+    productCat.textContent = p.cat;
+    productKicker.textContent = CAT_KICKER[p.catId] || '';
+    productName.textContent = p.name;
+    productDesc.textContent = p.desc;
+    productPrice.textContent = p.price;
+
+    const temps = p.temps || [];
+    productTempBox.hidden = temps.length === 0;
+    productTempsEl.innerHTML = temps.map(t => `
+      <button class="prod-chip${t === state.productTemp ? ' is-active' : ''}"
+              data-temp="${t}" aria-pressed="${t === state.productTemp}">${t}</button>
+    `).join('');
+
+    const sugars = p.sugars || [];
+    productSugarBox.hidden = sugars.length === 0;
+    productSugarsEl.innerHTML = sugars.map(s => `
+      <button class="prod-chip${s === state.productSugar ? ' is-active' : ''}"
+              data-sugar="${s}" aria-pressed="${s === state.productSugar}">${s}</button>
+    `).join('');
+    syncProductTotal();
+  }
+
+  function syncProductTotal() {
+    const p = PRODUCT_INDEX.get(state.productId);
+    if (!p) return;
+    productQtyEl.textContent = state.productQty;
+    productTotalEl.textContent = `¥${p.price * state.productQty}`;
+  }
+
+  function openProduct(id, from) {
+    const p = PRODUCT_INDEX.get(id);
+    if (!p) return;
+    state.productId = id;
+    state.productTemp = (p.temps && p.temps[0]) || '';
+    state.productSugar = (p.sugars && p.sugars.includes('正常糖')) ? '正常糖' : ((p.sugars && p.sugars[0]) || '');
+    state.productQty = 1;
+    state.productFrom = from || (current === 'delivery' ? 'delivery' : 'menu');
+    renderProduct();
+    go('product');
   }
 
   function updateCartUI() {
@@ -551,16 +667,18 @@
     cartList.innerHTML = entries.map(item => `
       <div class="cart-item">
         <div class="cart-item__thumb">
-          <svg viewBox="0 0 120 120" aria-hidden="true"><use href="#art-teapot"/></svg>
+          ${item.img
+            ? `<img src="${item.img}" alt="${escapeHtml(item.name)}">`
+            : '<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#art-teapot"/></svg>'}
         </div>
         <div class="cart-item__info">
-          <h4>${item.name}</h4>
-          <span>${item.desc}</span>
+          <h4>${escapeHtml(item.name)}${item.temp ? `<em class="cart-item__temp">${escapeHtml(item.temp)}</em>` : ''}${item.sugar ? `<em class="cart-item__temp">${escapeHtml(item.sugar)}</em>` : ''}</h4>
+          <span>${escapeHtml(item.desc)}</span>
         </div>
         <div class="stepper">
-          <button data-step="-1" data-id="${item.id}" aria-label="减少一份"><svg class="ic"><use href="#i-minus"/></svg></button>
+          <button data-step="-1" data-key="${item.key}" aria-label="减少一份"><svg class="ic"><use href="#i-minus"/></svg></button>
           <span>${item.qty}</span>
-          <button data-step="1" data-id="${item.id}" aria-label="增加一份"><svg class="ic"><use href="#i-plus"/></svg></button>
+          <button data-step="1" data-key="${item.key}" aria-label="增加一份"><svg class="ic"><use href="#i-plus"/></svg></button>
         </div>
         <div class="cart-item__price">¥${item.price * item.qty}</div>
       </div>
@@ -646,7 +764,7 @@
 
   function updateDeliveryBadges() {
     $$('[data-dadd]', deliveryGrid).forEach(btn => {
-      btn.dataset.qty = String(state.cart.get(btn.dataset.dadd) || 0);
+      btn.dataset.qty = String(qtyOf(btn.dataset.dadd));
     });
   }
 
@@ -673,7 +791,7 @@
           <p>${p.desc}</p>
           <div class="d-card__foot">
             <span class="d-card__price">${p.price}</span>
-            <button class="d-card__add press" data-dadd="${p.id}" data-qty="${state.cart.get(p.id) || 0}" aria-label="将 ${p.name} 加入茶篮">
+            <button class="d-card__add press" data-dadd="${p.id}" data-qty="${qtyOf(p.id)}" aria-label="将 ${p.name} 加入茶篮">
               <svg class="ic"><use href="#i-plus"/></svg>
             </button>
           </div>
@@ -789,7 +907,7 @@
     `;
     deliveryItems.innerHTML = entries.map(item => `
       <div class="d-item">
-        <span>${item.name}<small>×${item.qty}</small></span>
+        <span>${escapeHtml(item.name)}${item.temp ? `<i class="d-item__temp">${escapeHtml(item.temp)}</i>` : ''}${item.sugar ? `<i class="d-item__temp">${escapeHtml(item.sugar)}</i>` : ''}<small>×${item.qty}</small></span>
         <b>¥${item.price * item.qty}</b>
       </div>
     `).join('');
@@ -1026,7 +1144,7 @@
     const order = {
       id: Date.now(),
       no: `QM ${y}${mo}${da} ${hh}${mm}${mins}`,
-      items: entries.map(e => ({ id: e.id, name: e.name, price: e.price, qty: e.qty })),
+      items: entries.map(e => ({ id: e.id, name: e.name, price: e.price, qty: e.qty, temp: e.temp || '', sugar: e.sugar || '' })),
       total: totalOverride == null ? entries.reduce((s, e) => s + e.price * e.qty, 0) : totalOverride,
       mode: modeLabel(),
       time: `今日 ${hh}:${mm}`,
@@ -1048,7 +1166,7 @@
   function orderCardHTML(order) {
     const lines = order.items.map(item => `
       <div class="order-line">
-        <span class="order-line__name">${item.name}<small>×${item.qty}</small></span>
+        <span class="order-line__name">${escapeHtml(item.name)}${item.temp ? `<small class="order-line__temp">${escapeHtml(item.temp)}</small>` : ''}${item.sugar ? `<small class="order-line__temp">${escapeHtml(item.sugar)}</small>` : ''}<small>×${item.qty}</small></span>
         <span class="order-line__price">¥${item.price * item.qty}</span>
       </div>
     `).join('');
@@ -1477,7 +1595,7 @@
     deliveryGrid.addEventListener('click', e => {
       const btn = e.target.closest('[data-dadd]');
       if (!btn) return;
-      addToCart(btn.dataset.dadd, btn, $('#deliveryCartBtn'));
+      addToCart(btn.dataset.dadd, null, 1, btn, $('#deliveryCartBtn'));
       updateDeliveryBadges();
     });
     etaChips.addEventListener('click', e => {
@@ -1533,8 +1651,17 @@
       if (btn) switchCat(btn.dataset.cat);
     });
     productList.addEventListener('click', e => {
-      const btn = e.target.closest('[data-add]');
-      if (btn) addToCart(btn.dataset.add, btn);
+      const addBtn = e.target.closest('[data-add]');
+      if (addBtn) { openProduct(addBtn.dataset.add, 'menu'); return; }
+      const card = e.target.closest('.product');
+      if (card && card.dataset.pid) openProduct(card.dataset.pid, 'menu');
+    });
+    productList.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const card = e.target.closest('.product');
+      if (!card || !card.dataset.pid) return;
+      e.preventDefault();
+      openProduct(card.dataset.pid, 'menu');
     });
     searchInput.addEventListener('input', () => {
       clearTimeout(searchTimer);
@@ -1619,7 +1746,7 @@
     cartList.addEventListener('click', e => {
       const btn = e.target.closest('[data-step]');
       if (!btn) return;
-      setQty(btn.dataset.id, Number(btn.dataset.step));
+      setQty(btn.dataset.key, Number(btn.dataset.step));
     });
     clearCartBtn.addEventListener('click', () => {
       state.cart.clear();
@@ -1648,7 +1775,9 @@
       const order = state.orders.find(o => String(o.id) === btn.dataset.again);
       if (!order) return;
       order.items.forEach(item => {
-        state.cart.set(item.id, (state.cart.get(item.id) || 0) + item.qty);
+        const key = cartKey(item.id, item.temp, item.sugar);
+        const cur = state.cart.get(key);
+        state.cart.set(key, { id: item.id, temp: item.temp || '', sugar: item.sugar || '', qty: (cur ? cur.qty : 0) + item.qty });
       });
       updateCartUI();
       go('menu');
@@ -1681,6 +1810,55 @@
     // 登录 / 注册
     $('#loginBack').addEventListener('click', () => go('profile'));
     $('#registerBack').addEventListener('click', () => go('login'));
+
+    // 品牌故事
+    $('#brandEntry').addEventListener('click', () => go('about'));
+    $('#aboutBack').addEventListener('click', () => go('home'));
+
+    // 选购页
+    $('#productBack').addEventListener('click', () => go(state.productFrom));
+    productTempsEl.addEventListener('click', e => {
+      const chip = e.target.closest('[data-temp]');
+      if (!chip) return;
+      state.productTemp = chip.dataset.temp;
+      $$('[data-temp]', productTempsEl).forEach(el => {
+        const on = el.dataset.temp === state.productTemp;
+        el.classList.toggle('is-active', on);
+        el.setAttribute('aria-pressed', String(on));
+      });
+    });
+    productSugarsEl.addEventListener('click', e => {
+      const chip = e.target.closest('[data-sugar]');
+      if (!chip) return;
+      state.productSugar = chip.dataset.sugar;
+      $$('[data-sugar]', productSugarsEl).forEach(el => {
+        const on = el.dataset.sugar === state.productSugar;
+        el.classList.toggle('is-active', on);
+        el.setAttribute('aria-pressed', String(on));
+      });
+    });
+    $('.prod-qty').addEventListener('click', e => {
+      const btn = e.target.closest('[data-pqty]');
+      if (!btn) return;
+      const next = state.productQty + Number(btn.dataset.pqty);
+      if (next < 1 || next > 20) return;
+      state.productQty = next;
+      syncProductTotal();
+    });
+    $('#productAdd').addEventListener('click', () => {
+      const btn = $('#productAdd');
+      if (btn.classList.contains('is-busy')) return;
+      const p = PRODUCT_INDEX.get(state.productId);
+      if (!p) return;
+      btn.classList.add('is-busy');
+      btn.textContent = '已加入茶篮';
+      addToCart(state.productId, state.productTemp, state.productQty, null, null, state.productSugar);
+      setTimeout(() => {
+        btn.classList.remove('is-busy');
+        btn.textContent = '加入茶篮';
+        if (current === 'product') go(state.productFrom);
+      }, 380);
+    });
     $('#toRegister').addEventListener('click', () => go('register'));
     $('#toLogin').addEventListener('click', () => go('login'));
     $('#loginForm').addEventListener('submit', e => {

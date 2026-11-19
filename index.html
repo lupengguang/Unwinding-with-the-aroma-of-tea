@@ -260,17 +260,18 @@
       <section class="screen" id="screen-home" data-screen="home" aria-label="首页">
         <div class="screen__scroll" data-scroll="home">
           <header class="home-head">
-            <div class="brand brand--sm brand--logo">
+            <button class="brand brand--sm brand--logo brand--entry press" id="brandEntry" aria-label="了解解茶香品牌故事">
               <img class="brand__logo" src="assets/logo-mark.png" alt="解茶香">
-              <div class="brand__text">
-                <div class="brand__row">
+              <span class="brand__text">
+                <span class="brand__row">
                   <i class="brand__bar"></i><span class="brand__char">解</span>
                   <i class="brand__bar"></i><span class="brand__char">茶</span>
                   <i class="brand__bar"></i><span class="brand__char">香</span><i class="brand__bar"></i>
-                </div>
-                <p class="brand__en">JIE CHA XIANG · TEA</p>
-              </div>
-            </div>
+                </span>
+                <span class="brand__en">JIE CHA XIANG · TEA</span>
+              </span>
+              <svg class="brand__chev" aria-hidden="true"><use href="#i-chevron"/></svg>
+            </button>
             <button class="mini-capsule press" data-capsule aria-label="小程序菜单">
               <span class="capsule-dots"><i></i><i></i><i></i></span>
               <span class="capsule-line"></span>
@@ -500,6 +501,69 @@
         </div>
       </section>
 
+      <!-- ================= 选购 ================= -->
+      <section class="screen screen--product" id="screen-product" data-screen="product" aria-label="选购茶饮">
+        <div class="prod-head">
+          <button class="auth-back press" id="productBack" aria-label="返回">
+            <svg class="ic"><use href="#i-chevron"/></svg>
+          </button>
+          <p class="prod-head__title">选购</p>
+          <span class="prod-head__spacer" aria-hidden="true"></span>
+        </div>
+
+        <div class="prod-scroll" data-scroll="product">
+          <div class="prod-hero">
+            <div class="prod-hero__art" id="productArt"></div>
+            <span class="prod-hero__cat" id="productCat">四季茶香</span>
+          </div>
+
+          <div class="prod-main">
+            <p class="prod-kicker" id="productKicker">SEASONAL TEA COLLECTION</p>
+            <h1 class="prod-name" id="productName">白茶系</h1>
+            <p class="prod-desc" id="productDesc"></p>
+            <div class="prod-price"><span>¥</span><b id="productPrice">20</b></div>
+          </div>
+
+          <section class="prod-opt" id="productTempBox">
+            <header class="prod-opt__head">
+              <h2>温度</h2>
+              <p>冷热由你决定</p>
+            </header>
+            <div class="prod-chips" id="productTemps" role="group" aria-label="选择温度"></div>
+          </section>
+
+          <section class="prod-opt" id="productSugarBox">
+            <header class="prod-opt__head">
+              <h2>糖度</h2>
+              <p>甜一点，或淡一点</p>
+            </header>
+            <div class="prod-chips" id="productSugars" role="group" aria-label="选择糖度"></div>
+          </section>
+
+          <section class="prod-opt">
+            <header class="prod-opt__head">
+              <h2>数量</h2>
+              <p>同款多杯，一起带走</p>
+            </header>
+            <div class="prod-qty">
+              <button class="press" data-pqty="-1" aria-label="减少一杯"><svg class="ic"><use href="#i-minus"/></svg></button>
+              <b id="productQty">1</b>
+              <button class="press" data-pqty="1" aria-label="增加一杯"><svg class="ic"><use href="#i-plus"/></svg></button>
+            </div>
+          </section>
+
+          <p class="prod-note">原叶现泡 · 现点现做 · 建议三十秒内取茶</p>
+        </div>
+
+        <div class="prod-bar">
+          <div class="prod-bar__sum">
+            <small>合计</small>
+            <b id="productTotal">¥20</b>
+          </div>
+          <button class="prod-bar__add press" id="productAdd">加入茶篮</button>
+        </div>
+      </section>
+
       <!-- ================= 订单 ================= -->
       <section class="screen" id="screen-orders" data-screen="orders" aria-label="我的订单">
         <div class="sub-head">
@@ -602,6 +666,75 @@
           </section>
 
           <p class="profile-version">解 茶 香 · J I E C H A · V 1 . 0</p>
+        </div>
+      </section>
+
+      <!-- ============ 品牌故事 ============ -->
+      <section class="screen screen--about" id="screen-about" data-screen="about" aria-label="关于解茶香">
+        <span class="about-deco" aria-hidden="true"></span>
+        <span class="about-ring" aria-hidden="true"></span>
+
+        <div class="about-scroll" data-scroll="about">
+          <div class="auth-top">
+            <button class="auth-back press" id="aboutBack" aria-label="返回首页">
+              <svg class="ic"><use href="#i-chevron"/></svg>
+            </button>
+            <span class="auth-brand">
+              <img src="assets/logo-mark-sm.png" alt="解茶香">
+            </span>
+          </div>
+
+          <header class="about-hero">
+            <p class="about-kicker">ABOUT · JIE CHA XIANG</p>
+            <h1 class="about-title">解茶香</h1>
+            <p class="about-motto">一壶清茶 · 慢茶时光</p>
+            <p class="about-lead">解茶香是一家以东方原叶茶为底的中式茶饮小店。</p>
+          </header>
+
+          <section class="about-block" style="--i:0">
+            <header class="about-block__head">
+              <span class="about-block__no">01</span>
+              <h2 class="about-block__title">两条茶线</h2>
+            </header>
+            <div class="about-lines">
+              <article class="about-line">
+                <h3>四季茶香</h3>
+                <p>随节气更换白茶、红茶、岩茶、绿茶。</p>
+              </article>
+              <article class="about-line">
+                <h3>日常口味</h3>
+                <p>鲜果调茶、轻乳奶茶、清润冷萃，还有配茶的中式茶點。</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="about-block" style="--i:1">
+            <header class="about-block__head">
+              <span class="about-block__no">02</span>
+              <h2 class="about-block__title">三个坚持</h2>
+            </header>
+            <ul class="about-pillars">
+              <li><b>原叶现泡</b><span>不使用茶粉与香精</span></li>
+              <li><b>当季食材</b><span>鲜果当场处理</span></li>
+              <li><b>轻甜轻乳</b><span>茶味在前，甜味在后</span></li>
+            </ul>
+          </section>
+
+          <section class="about-block" style="--i:2">
+            <header class="about-block__head">
+              <span class="about-block__no">03</span>
+              <h2 class="about-block__title">视觉</h2>
+            </header>
+            <p class="about-text">取茶绿与米白，取青瓷的温润、山野的清淡，不用重色堆砌。</p>
+            <div class="about-swatches" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          </section>
+
+          <div class="about-coda" style="--i:3">
+            <p>我们不追求把茶做成仪式，<br>只希望你在一天里，<br>愿意为这一杯停三十秒。</p>
+            <span class="about-stamp" aria-hidden="true">解</span>
+          </div>
+
+          <p class="about-foot">解 茶 香 · JIE CHA XIANG · TEA</p>
         </div>
       </section>
 
