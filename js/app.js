@@ -13,6 +13,9 @@
     menu: $('#screen-menu'),
     product: $('#screen-product'),
     orders: $('#screen-orders'),
+    orderDetail: $('#screen-order-detail'),
+    payment: $('#screen-payment'),
+    coupons: $('#screen-coupons'),
     profile: $('#screen-profile'),
     login: $('#screen-login'),
     register: $('#screen-register'),
@@ -26,7 +29,9 @@
     member: $('#memberSheet'),
     store: $('#storeSheet'),
     address: $('#addressSheet'),
-    delivery: $('#deliverySheet')
+    delivery: $('#deliverySheet'),
+    coupon: $('#couponSheet'),
+    refund: $('#refundSheet')
   };
   let current = 'splash';
   let splashTimer = null;
@@ -220,6 +225,15 @@
     { id: 'jingcheng-tenfu', region: 'other', name: '北京京城天福茶庄有限公司石景山第一分店', addr: '石景山区', dist: '4.6km', tags: ['品牌连锁', '石景山'] }
   ];
 
+  const COUPON_SEED = [
+    { id: 'welcome-2', name: '新客见面礼', kind: 'cash', value: 200, minSubtotal: 0, scope: 'all', status: 'available', expiry: '2026.12.31', note: '全场茶饮无门槛使用' },
+    { id: 'tea-20-5', name: '清茶满减券', kind: 'cash', value: 500, minSubtotal: 2000, scope: 'all', status: 'available', expiry: '2026.12.31', note: '一杯清茶，一份小确幸' },
+    { id: 'afternoon-85', name: '午后 85 折券', kind: 'discount', value: 85, minSubtotal: 3000, scope: 'all', status: 'available', expiry: '2026.12.31', note: '午后茶时光专享折扣' },
+    { id: 'delivery-3', name: '外卖配送券', kind: 'delivery', value: 300, minSubtotal: 0, scope: 'delivery', status: 'available', expiry: '2026.12.31', note: '仅抵扣订单实际配送费' },
+    { id: 'share-50-10', name: '好茶分享券', kind: 'cash', value: 1000, minSubtotal: 5000, scope: 'all', status: 'claimable', expiry: '2027.01.31', note: '领取后与好友共享好茶' },
+    { id: 'mellow-90', name: '醇香 9 折券', kind: 'discount', value: 90, minSubtotal: 4000, scope: 'all', status: 'claimable', expiry: '2027.01.31', note: '醇香茶品会员礼遇' }
+  ];
+
   const state = {
     mode: 'takeout',
     cat: 'season',
@@ -230,6 +244,13 @@
     cart: new Map(),
     orders: [],
     orderTab: 'all',
+    selectedOrderId: null,
+    refundReason: '不想要了',
+    paymentMethod: 'wechat',
+    paymentDraft: null,
+    coupons: COUPON_SEED.map(coupon => ({ ...coupon })),
+    couponTab: 'all',
+    couponFrom: 'profile',
     loggedIn: false,
     deliveryCat: 'all',
     deliveryEta: 'asap',
@@ -242,6 +263,11 @@
     productAddons: [],
     productQty: 1,
     productFrom: 'menu'
+  };
+  const PAYMENT_METHODS = {
+    wechat: '微信支付',
+    alipay: '支付宝',
+    unionpay: '云闪付'
   };
 
   /* ---------------- 元素 ---------------- */
@@ -278,6 +304,24 @@
   const orderList = $('#orderList');
   const ordersEmpty = $('#ordersEmpty');
   const ordersEmptyText = $('#ordersEmptyText');
+  const orderDetailContent = $('#orderDetailContent');
+  const refundBtn = $('#refundBtn');
+  const refundApplyView = $('#refundApplyView');
+  const refundStatusView = $('#refundStatusView');
+  const refundNote = $('#refundNote');
+  const paymentAmount = $('#paymentAmount');
+  const paymentMode = $('#paymentMode');
+  const paymentCount = $('#paymentCount');
+  const paymentItems = $('#paymentItems');
+  const paymentPriceDetails = $('#paymentPriceDetails');
+  const paymentCouponBtn = $('#paymentCouponBtn');
+  const paymentCouponHint = $('#paymentCouponHint');
+  const paymentCouponValue = $('#paymentCouponValue');
+  const paymentCouponList = $('#paymentCouponList');
+  const paymentMethods = $('#paymentMethods');
+  const confirmPaymentBtn = $('#confirmPaymentBtn');
+  const couponList = $('#couponList');
+  const couponTabs = $('#couponTabs');
   const loginBtn = $('#loginBtn');
   const loginTip = $('#loginTip');
   const greetingLine = $('#greetingLine');
@@ -358,7 +402,10 @@
       if (n === 'register') return TAB_ORDER.length + 1;
       if (n === 'delivery') return TAB_ORDER.length + 2;
       if (n === 'about') return TAB_ORDER.length + 3;
-      if (n === 'product') return TAB_ORDER.length + 4;
+      if (n === 'coupons') return TAB_ORDER.length + 4;
+      if (n === 'product') return TAB_ORDER.length + 5;
+      if (n === 'orderDetail') return TAB_ORDER.length + 6;
+      if (n === 'payment') return TAB_ORDER.length + 7;
       const i = TAB_ORDER.indexOf(n);
       return i === -1 ? 0 : i;
     };
@@ -429,7 +476,7 @@
       try { inAnim.cancel(); } catch (e) {}
     };
 
-    if (name === 'login' || name === 'register' || name === 'delivery' || name === 'about' || name === 'product') {
+    if (name === 'login' || name === 'register' || name === 'delivery' || name === 'about' || name === 'product' || name === 'orderDetail' || name === 'payment' || name === 'coupons') {
       const sc = $(`[data-scroll="${name}"]`);
       if (sc) sc.scrollTop = 0;
       if (name === 'login' || name === 'register') {
@@ -481,7 +528,8 @@
 
   function updateTabs() {
     $$('#tabbar .tab[data-nav]').forEach(btn => {
-      btn.classList.toggle('is-active', btn.dataset.nav === current);
+      const activeView = current === 'orderDetail' ? 'orders' : current === 'payment' ? 'menu' : current === 'coupons' ? 'profile' : current;
+      btn.classList.toggle('is-active', btn.dataset.nav === activeView);
     });
   }
 
@@ -1039,7 +1087,7 @@
   }
 
   function closeDelivery() {
-    go(state.deliveryFrom === 'menu' ? 'menu' : 'home');
+    go(screenEl[state.deliveryFrom] && state.deliveryFrom !== 'delivery' ? state.deliveryFrom : 'home');
   }
 
   /* ---------------- 取餐方式 ---------------- */
@@ -1213,6 +1261,8 @@
       showAddrView('list');
     }
     if (name === 'delivery') renderDeliverySheet();
+    if (name === 'coupon') renderPaymentCouponList();
+    if (name === 'refund') renderRefundSheet();
     if (name === 'store') {
       state.storeRegion = selectedStore().region;
       state.storeQuery = '';
@@ -1243,33 +1293,74 @@
     return state.mode === 'takeout' ? '门店自取' : '配送到家';
   }
 
-  function createOrder(entries, totalOverride = null) {
+  function createOrder(entries, totalOverride = null, payment = '未记录', coupon = null) {
     const { hh, mm, y, mo, da } = nowParts();
-    const mins = String(Math.floor(Math.random() * 90));
+    const mins = String(Math.floor(Math.random() * 90)).padStart(2, '0');
+    const store = selectedStore();
     const order = {
       id: Date.now(),
       no: `QM ${y}${mo}${da} ${hh}${mm}${mins}`,
+      pickupCode: String(Math.floor(100000 + Math.random() * 900000)),
       items: entries.map(e => ({
         id: e.id, name: e.name, price: e.price, qty: e.qty,
         temp: e.temp || '', sugar: e.sugar || '',
-        size: e.size || '', addons: e.addons || []
+        size: e.size || '', addons: (e.addons || []).slice()
       })),
       total: totalOverride == null ? entries.reduce((s, e) => s + e.price * e.qty, 0) : totalOverride,
       mode: modeLabel(),
+      payment,
+      couponId: coupon ? coupon.id : '',
+      couponName: coupon ? coupon.name : '',
+      couponDiscount: coupon ? coupon.discount : 0,
       time: `今日 ${hh}:${mm}`,
       type: 'store',
-      status: 'brewing'
+      status: 'brewing',
+      refund: null,
+      store: {
+        id: store.id,
+        name: store.name,
+        addr: store.addr,
+        dist: store.dist
+      }
     };
     state.orders.unshift(order);
     state.cart.clear();
     updateCartUI();
 
     setTimeout(() => {
+      if (order.status !== 'brewing') return;
       order.status = 'ready';
       renderOrders();
+      if (current === 'orderDetail' && state.selectedOrderId === order.id) renderOrderDetail();
     }, 9000);
 
     return order;
+  }
+
+  function orderStatusInfo(order) {
+    const isDelivery = order.mode === '配送到家';
+    if (order.status === 'refunding') return {
+      text: '退款审核中', title: '退款审核中',
+      sub: '门店正在处理您的退款申请，结果会及时更新',
+      className: 'is-refunding', icon: 'i-clock', step: 1
+    };
+    if (order.status === 'refunded') return {
+      text: '已退款', title: '退款成功',
+      sub: `¥${order.total} 已原路退回，请注意查收`,
+      className: 'is-refunded', icon: 'i-check', step: 1
+    };
+    if (order.status === 'ready') return {
+      text: isDelivery ? '配送中' : '待取茶',
+      title: isDelivery ? '茶饮已出杯' : '茶香已备好',
+      sub: isDelivery ? '骑手正在送往您的收货地址，请保持电话畅通' : '请凭取茶码到店取茶，新鲜现泡，建议尽快饮用',
+      className: 'is-ready', icon: 'i-check', step: 2
+    };
+    return {
+      text: isDelivery ? '备茶中' : '制作中',
+      title: isDelivery ? '正在备茶' : '正在制作',
+      sub: '茶艺师正在为您现泡，预计还需 6 分钟',
+      className: '', icon: 'i-teapot', step: 1
+    };
   }
 
   function orderCardHTML(order) {
@@ -1284,21 +1375,24 @@
         <span class="order-line__price">¥${item.price * item.qty}</span>
       </div>`;
     }).join('');
-    const ready = order.status === 'ready';
-    const isDelivery = order.mode === '配送到家';
-    const statusText = isDelivery ? (ready ? '配送中' : '备茶中') : (ready ? '待取茶' : '制作中');
+    const info = orderStatusInfo(order);
     return `
       <article class="order-card">
-        <div class="order-card__head">
-          <span class="order-card__no">${order.no}</span>
-          <span class="order-card__status ${ready ? 'is-ready' : ''}">${statusText}</span>
+        <button class="order-card__main" data-detail="${order.id}" aria-label="查看订单 ${escapeHtml(order.no)} 的详情">
+          <div class="order-card__head">
+            <span class="order-card__no">${escapeHtml(order.no)}</span>
+            <span class="order-card__status ${info.className}">${info.text}</span>
+          </div>
+          <div class="order-card__items">${lines}</div>
+          <div class="order-card__foot">
+            <span class="order-card__meta">${order.mode} · ${order.time}</span>
+            <span class="order-card__total">合计 ¥${order.total}</span>
+          </div>
+        </button>
+        <div class="order-card__actions">
+          <button data-detail="${order.id}">订单详情</button>
+          <button data-again="${order.id}">再来一单</button>
         </div>
-        <div class="order-card__items">${lines}</div>
-        <div class="order-card__foot">
-          <span class="order-card__meta">${order.mode} · ${order.time}</span>
-          <span class="order-card__total">合计 ¥${order.total}</span>
-        </div>
-        <div class="order-card__again"><button data-again="${order.id}">再来一单</button></div>
       </article>
     `;
   }
@@ -1317,6 +1411,226 @@
     orderList.innerHTML = list.map(orderCardHTML).join('');
   }
 
+  function selectedOrder() {
+    return state.orders.find(order => order.id === state.selectedOrderId) || null;
+  }
+
+  function openOrderDetail(id) {
+    const order = state.orders.find(item => String(item.id) === String(id));
+    if (!order) return;
+    state.selectedOrderId = order.id;
+    renderOrderDetail();
+    go('orderDetail');
+  }
+
+  function orderProgressHTML(order) {
+    const currentStep = orderStatusInfo(order).step;
+    const labels = order.mode === '配送到家'
+      ? ['已下单', '备茶中', '配送中', '已送达']
+      : ['已下单', '制作中', '待取茶', '已完成'];
+    return labels.map((label, index) => {
+      const done = index < currentStep;
+      const active = index === currentStep;
+      return `
+        <li class="order-progress__step${done ? ' is-done' : ''}${active ? ' is-current' : ''}">
+          <span class="order-progress__dot">${done ? '✓' : index + 1}</span>
+          <b>${label}</b>
+          <small>${done ? '已完成' : active ? '进行中' : '待更新'}</small>
+        </li>`;
+    }).join('');
+  }
+
+  function renderOrderDetail() {
+    const order = selectedOrder();
+    if (!order) return;
+    const info = orderStatusInfo(order);
+    const store = order.store || selectedStore();
+    const isRefund = order.status === 'refunding' || order.status === 'refunded';
+    const isTakeout = order.mode === '门店自取';
+    const pickupCode = order.pickupCode || String(order.id).slice(-6).padStart(6, '0');
+
+    const goods = order.items.map(item => {
+      const product = PRODUCT_INDEX.get(item.id);
+      const tags = [item.temp, item.sugar, item.size,
+        ...(item.addons || []).map(formatAddonName)].filter(Boolean).join(' · ');
+      return `
+        <div class="order-good">
+          <div class="order-good__thumb">
+            ${product && product.img
+              ? `<img src="${escapeHtml(product.img)}" alt="${escapeHtml(item.name)}">`
+              : '<svg viewBox="0 0 120 120" aria-hidden="true"><use href="#art-teapot"/></svg>'}
+          </div>
+          <div class="order-good__body">
+            <h4>${escapeHtml(item.name)}</h4>
+            <p>${escapeHtml(tags || '标准规格')}</p>
+          </div>
+          <div class="order-good__price"><b>¥${item.price * item.qty}</b><small>×${item.qty}</small></div>
+        </div>`;
+    }).join('');
+
+    orderDetailContent.innerHTML = `
+      <section class="order-status-card ${info.className}">
+        <span class="order-status-card__icon"><svg class="ic"><use href="#${info.icon}"/></svg></span>
+        <div class="order-status-card__body">
+          <small>JIE CHA XIANG · ORDER</small>
+          <h2>${info.title}</h2>
+          <p>${info.sub}</p>
+        </div>
+      </section>
+
+      ${isTakeout && !isRefund ? `
+        <section class="order-detail-card pickup-card">
+          <div class="detail-card-head"><h3>取茶码</h3><small>${order.status === 'ready' ? '已出杯 · 请尽快取茶' : '取茶时请出示'}</small></div>
+          <button class="pickup-code" data-copy-code="${pickupCode}" aria-label="复制取茶码 ${pickupCode}">
+            <span>${pickupCode.slice(0, 3)}</span><span>${pickupCode.slice(3)}</span><small>点击复制</small>
+          </button>
+          <p class="pickup-card__tip"><i></i>到店向店员出示此码，核销后即可取茶</p>
+        </section>` : ''}
+
+      ${isRefund ? `
+        <section class="order-detail-card order-refund-note">
+          <span class="order-refund-note__icon"><svg class="ic"><use href="#${order.status === 'refunded' ? 'i-check' : 'i-clock'}"/></svg></span>
+          <div>
+            <h3>${order.status === 'refunded' ? '退款已完成' : '退款申请已提交'}</h3>
+            <p>${order.status === 'refunded' ? `¥${order.total} 已原路退回，请注意查收` : '门店正在审核，退款状态会自动更新'}</p>
+          </div>
+          <button data-refund-open>查看</button>
+        </section>` : `
+        <section class="order-detail-card">
+          <div class="detail-card-head"><h3>制作进度</h3><small>状态自动更新</small></div>
+          <ol class="order-progress">${orderProgressHTML(order)}</ol>
+        </section>`}
+
+      <section class="order-detail-card">
+        <div class="detail-card-head"><h3>${isTakeout ? '取茶门店' : '出品门店'}</h3><small>营业中</small></div>
+        <div class="order-store__top">
+          <span class="order-store__icon"><svg class="ic"><use href="#i-pin"/></svg></span>
+          <div class="order-store__body">
+            <h3>${escapeHtml(store.name)}</h3>
+            <p>${escapeHtml(store.addr)}</p>
+            <div class="order-store__meta"><b>09:00 - 22:00</b><span>·</span><span>${escapeHtml(store.dist)}</span></div>
+          </div>
+          <button class="order-store__copy" data-copy-address="${escapeHtml(store.addr)}">复制地址</button>
+        </div>
+      </section>
+
+      <section class="order-detail-card">
+        <div class="detail-card-head"><h3>商品明细</h3><small>共 ${order.items.reduce((sum, item) => sum + item.qty, 0)} 件</small></div>
+        <div class="order-goods">${goods}</div>
+      </section>
+
+      <section class="order-detail-card">
+        <div class="detail-card-head"><h3>订单信息</h3><small>电子小票</small></div>
+        <dl class="order-meta">
+          <div><dt>订单编号</dt><dd>${escapeHtml(order.no)}</dd></div>
+          <div><dt>下单时间</dt><dd>${escapeHtml(order.time)}</dd></div>
+          <div><dt>取餐方式</dt><dd>${escapeHtml(order.mode)}</dd></div>
+          <div><dt>支付方式</dt><dd>${escapeHtml(order.payment || '未记录')}</dd></div>
+          ${order.couponName ? `
+            <div><dt>优惠券</dt><dd>${escapeHtml(order.couponName)}</dd></div>
+            <div><dt>券优惠</dt><dd class="is-discount">-¥${formatMoney(order.couponDiscount)}</dd></div>` : ''}
+          <div class="is-total"><dt>实付金额</dt><dd>¥${formatMoney(order.total)}</dd></div>
+        </dl>
+      </section>`;
+
+    refundBtn.textContent = order.status === 'refunding'
+      ? '退款进度'
+      : order.status === 'refunded' ? '退款详情' : '申请退款';
+  }
+
+  function renderRefundSheet() {
+    const order = selectedOrder();
+    if (!order) return;
+    const hasRefund = Boolean(order.refund);
+    refundApplyView.hidden = hasRefund;
+    refundStatusView.hidden = !hasRefund;
+    $('#refundSheetTitle').textContent = hasRefund ? '退款详情' : '申请退款';
+
+    if (!hasRefund) {
+      $('#refundAmount').textContent = `¥${order.total}`;
+      $$('[data-refund-reason]', $('#refundReasons')).forEach(btn => {
+        const active = btn.dataset.refundReason === state.refundReason;
+        btn.classList.toggle('is-active', active);
+        btn.setAttribute('aria-pressed', String(active));
+      });
+      return;
+    }
+
+    const refunded = order.status === 'refunded';
+    $('#refundStatusTitle').textContent = refunded ? '退款成功' : '退款审核中';
+    $('#refundStatusDesc').textContent = refunded
+      ? '退款已原路退回，到账时间以支付机构为准'
+      : '门店正在处理您的退款申请，请稍候';
+    $('#refundStatusAmount').textContent = `¥${order.total}`;
+    $('#refundStatusReason').textContent = order.refund.reason;
+    $('.refund-status__icon use').setAttribute('href', refunded ? '#i-check' : '#i-clock');
+  }
+
+  function openRefundSheet() {
+    const order = selectedOrder();
+    if (!order) return;
+    if (!order.refund) {
+      state.refundReason = '不想要了';
+      refundNote.value = '';
+    }
+    openSheet('refund');
+  }
+
+  function applyRefund() {
+    const order = selectedOrder();
+    if (!order || order.refund) return;
+    const { hh, mm } = nowParts();
+    order.status = 'refunding';
+    order.refund = {
+      reason: state.refundReason,
+      note: refundNote.value.trim(),
+      appliedAt: `今日 ${hh}:${mm}`
+    };
+    closeSheets();
+    renderOrders();
+    renderOrderDetail();
+    toast('退款申请已提交，门店正在审核');
+
+    setTimeout(() => {
+      order.status = 'refunded';
+      order.refund.completedAt = '刚刚';
+      renderOrders();
+      if (state.selectedOrderId !== order.id) return;
+      if (current === 'orderDetail') renderOrderDetail();
+      if (sheets.refund.classList.contains('is-open')) renderRefundSheet();
+      toast('退款已原路退回');
+    }, 4500);
+  }
+
+  function reorder(order) {
+    if (!order) return;
+    order.items.forEach(item => {
+      const addons = item.addons && item.addons.length ? item.addons.slice() : [];
+      const key = cartKey(item.id, item.temp, item.sugar, item.size, addons);
+      const currentItem = state.cart.get(key);
+      state.cart.set(key, {
+        id: item.id, temp: item.temp || '', sugar: item.sugar || '',
+        size: item.size || '', addons,
+        qty: (currentItem ? currentItem.qty : 0) + item.qty
+      });
+    });
+    updateCartUI();
+    go('menu');
+    renderCart();
+    setTimeout(openCart, 320);
+    toast('已为您重新加入茶篮');
+  }
+
+  async function copyText(text, message) {
+    try {
+      if (!navigator.clipboard) throw new Error('clipboard unavailable');
+      await navigator.clipboard.writeText(text);
+      toast(message);
+    } catch (error) {
+      toast(`请手动复制：${text}`);
+    }
+  }
+
   function syncOrderTabs() {
     const active = $(`#orderTabs button[data-tab="${state.orderTab}"]`);
     if (!active || !orderInk) return;
@@ -1328,24 +1642,342 @@
     orderInk.style.left = `${rect.left - parent.left + rect.width / 2 - 11}px`;
   }
 
-  /* ---------------- 结算流程 ---------------- */
+  /* ---------------- 券中心与结算流程 ---------------- */
   let busy = false;
-  function checkout(totalOverride = null) {
+
+  function formatMoney(value) {
+    return Number(value || 0).toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
+  }
+  function toCents(value) {
+    return Math.round(Number(value || 0) * 100);
+  }
+  function fromCents(value) {
+    return value / 100;
+  }
+  function couponScopeLabel(coupon) {
+    return coupon.scope === 'delivery' ? '仅外卖可用' : '自取 / 外卖可用';
+  }
+  function couponTypeLabel(coupon) {
+    return coupon.kind === 'discount' ? '折扣券' : coupon.kind === 'delivery' ? '配送券' : '满减券';
+  }
+  function couponRuleText(coupon) {
+    return coupon.minSubtotal ? `满 ${formatMoney(fromCents(coupon.minSubtotal))} 元可用` : '无门槛使用';
+  }
+  function couponFaceHTML(coupon) {
+    const value = coupon.kind === 'discount'
+      ? formatMoney(coupon.value / 10)
+      : formatMoney(fromCents(coupon.value));
+    return `
+      <div class="coupon-face">
+        <div class="coupon-face__value">${coupon.kind === 'discount'
+          ? `<strong>${value}</strong><span>折</span>`
+          : `<span>¥</span><strong>${value}</strong>`}</div>
+        <small>${couponTypeLabel(coupon)}</small>
+      </div>`;
+  }
+  function syncCouponStats() {
+    const count = state.coupons.filter(coupon => coupon.status === 'available').length;
+    $('#couponAvailableCount').textContent = count;
+    $('#profileCouponCount').textContent = `${count} 张可用`;
+    $$('[data-stat="coupon"], [data-home-stat="coupon"]').forEach(el => {
+      el.textContent = count;
+    });
+  }
+  function renderCoupons() {
+    syncCouponStats();
+    $$('[data-coupon-tab]', couponTabs).forEach(btn => {
+      const active = btn.dataset.couponTab === state.couponTab;
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-selected', String(active));
+    });
+    const list = state.coupons.filter(coupon => state.couponTab === 'all' || coupon.status === state.couponTab);
+    if (!list.length) {
+      couponList.innerHTML = `
+        <div class="coupon-empty">
+          <svg class="ic" aria-hidden="true"><use href="#i-ticket"/></svg>
+          <h3>这里还没有优惠券</h3><p>看看其他分类，或领取一张好茶礼券</p>
+        </div>`;
+      return;
+    }
+    couponList.innerHTML = list.map(coupon => {
+      const statusText = { available: '可使用', claimable: '待领取', used: '已使用' }[coupon.status];
+      const action = coupon.status === 'claimable'
+        ? `<button class="coupon-card__action coupon-card__action--claim press" data-claim-coupon="${coupon.id}">立即领取</button>`
+        : coupon.status === 'available'
+          ? `<button class="coupon-card__action press" data-use-coupon="${coupon.id}">去使用</button>`
+          : '<button class="coupon-card__action" disabled>已使用</button>';
+      return `
+        <article class="coupon-card coupon-card--${coupon.kind} is-${coupon.status}">
+          <div class="coupon-card__content">
+            ${couponFaceHTML(coupon)}
+            <div class="coupon-card__body">
+              <div class="coupon-card__title"><h3>${escapeHtml(coupon.name)}</h3><span>${statusText}</span></div>
+              <p>${couponRuleText(coupon)}</p>
+              <small>${couponScopeLabel(coupon)}</small>
+              <small>有效期至 ${coupon.expiry}</small>
+            </div>
+          </div>
+          <div class="coupon-card__footer"><span>${escapeHtml(coupon.note)}</span>${action}</div>
+        </article>`;
+    }).join('');
+  }
+  function openCoupons(from) {
+    const source = from || current;
+    state.couponFrom = screenEl[source] && source !== 'coupons' && source !== 'splash' ? source : 'profile';
+    closeSheets();
+    renderCoupons();
+    go('coupons');
+  }
+  function claimCoupon(id) {
+    const coupon = state.coupons.find(item => item.id === id);
+    if (!coupon || coupon.status !== 'claimable') return;
+    coupon.status = 'available';
+    renderCoupons();
+    toast(`已领取「${coupon.name}」`);
+  }
+  function useCoupon(id) {
+    const coupon = state.coupons.find(item => item.id === id);
+    if (!coupon || coupon.status !== 'available') return;
+    if (coupon.scope === 'delivery') {
+      openDelivery('coupons');
+    } else {
+      setMode('takeout', false);
+      go('menu');
+    }
+    toast('点单结算时可使用此券');
+  }
+
+  function couponUnavailableReason(coupon, draft) {
+    if (!draft) return '订单信息已失效';
+    if (coupon.status === 'used') return '此券已使用';
+    if (coupon.status === 'claimable') return '请先到券中心领取';
+    if (coupon.status !== 'available') return '此券暂不可用';
+    if (coupon.scope === 'delivery' && draft.modeKey !== 'delivery') return '仅外卖订单可用';
+    const subtotal = toCents(draft.subtotal);
+    if (subtotal < coupon.minSubtotal) {
+      return `满 ${formatMoney(fromCents(coupon.minSubtotal))} 元可用，还差 ${formatMoney(fromCents(coupon.minSubtotal - subtotal))} 元`;
+    }
+    if (coupon.kind === 'delivery' && toCents(draft.deliveryFee) <= 0) return '当前订单已免配送费';
+    if (coupon.kind !== 'delivery' && subtotal - toCents(draft.activityDiscount) <= 0) return '当前订单无需用券';
+    return '';
+  }
+  function couponDiscount(coupon, draft) {
+    if (!coupon || couponUnavailableReason(coupon, draft)) return 0;
+    if (coupon.kind === 'delivery') {
+      return Math.min(coupon.value, toCents(draft.deliveryFee));
+    }
+    const subtotal = toCents(draft.subtotal);
+    const productAfterActivity = Math.max(0, subtotal - toCents(draft.activityDiscount));
+    const discount = coupon.kind === 'discount'
+      ? Math.floor(subtotal * (100 - coupon.value) / 100)
+      : coupon.value;
+    return Math.min(discount, productAfterActivity);
+  }
+  function bestCoupon(draft) {
+    let best = null;
+    let maxDiscount = 0;
+    state.coupons.forEach(coupon => {
+      const discount = couponDiscount(coupon, draft);
+      if (discount > maxDiscount) {
+        best = coupon;
+        maxDiscount = discount;
+      }
+    });
+    return best;
+  }
+  function recalculateDraft() {
+    const draft = state.paymentDraft;
+    if (!draft) return;
+    const coupon = state.coupons.find(item => item.id === draft.couponId);
+    const discount = couponDiscount(coupon, draft);
+    draft.couponDiscount = fromCents(discount);
+    draft.total = fromCents(Math.max(0,
+      toCents(draft.subtotal) + toCents(draft.deliveryFee) + toCents(draft.packFee)
+      - toCents(draft.activityDiscount) - discount
+    ));
+  }
+  function renderPaymentCouponList() {
+    const draft = state.paymentDraft;
+    if (!draft) {
+      paymentCouponList.innerHTML = '';
+      return;
+    }
+    const noneOption = `
+      <button class="payment-coupon-option payment-coupon-option--none${draft.couponId ? '' : ' is-active'}" data-select-coupon="" role="radio" aria-checked="${!draft.couponId}">
+        <span class="payment-coupon-option__none-icon"><svg class="ic"><use href="#i-close"/></svg></span>
+        <span class="payment-coupon-option__body"><b>不使用优惠券</b><small>保留优惠券，下次结算再用</small></span>
+        <span class="payment-coupon-option__check"><svg class="ic"><use href="#i-check"/></svg></span>
+      </button>`;
+    const options = state.coupons.filter(coupon => coupon.status !== 'claimable').map(coupon => {
+      const reason = couponUnavailableReason(coupon, draft);
+      const discount = couponDiscount(coupon, draft);
+      const active = draft.couponId === coupon.id && !reason;
+      return `
+        <button class="payment-coupon-option coupon-card--${coupon.kind}${active ? ' is-active' : ''}${reason ? ' is-disabled' : ''}"
+          data-select-coupon="${coupon.id}" role="radio" aria-checked="${active}" ${reason ? 'disabled' : ''}>
+          ${couponFaceHTML(coupon)}
+          <span class="payment-coupon-option__body">
+            <b>${escapeHtml(coupon.name)}</b>
+            <small>${couponRuleText(coupon)} · ${couponScopeLabel(coupon)}</small>
+            <em>${reason || `本单可减 ¥${formatMoney(fromCents(discount))}`}</em>
+          </span>
+          <span class="payment-coupon-option__check"><svg class="ic"><use href="#i-check"/></svg></span>
+        </button>`;
+    }).join('');
+    paymentCouponList.innerHTML = noneOption + options;
+  }
+  function selectCoupon(id) {
+    if (busy || !state.paymentDraft) return;
+    const coupon = id ? state.coupons.find(item => item.id === id) : null;
+    if (id) {
+      if (!coupon) return;
+      const reason = couponUnavailableReason(coupon, state.paymentDraft);
+      if (reason) {
+        toast(reason);
+        return;
+      }
+    }
+    state.paymentDraft.couponId = coupon ? coupon.id : null;
+    recalculateDraft();
+    renderPayment();
+    renderPaymentCouponList();
+    closeSheets();
+    toast(coupon ? `已选择「${coupon.name}」` : '本单不使用优惠券');
+  }
+
+  function selectPayment(method) {
+    if (!PAYMENT_METHODS[method]) return;
+    state.paymentMethod = method;
+    $$('input[name="paymentMethod"]', paymentMethods).forEach(input => {
+      const active = input.value === method;
+      input.checked = active;
+      input.closest('.payment-method').classList.toggle('is-active', active);
+    });
+    const total = state.paymentDraft ? state.paymentDraft.total : 0;
+    confirmPaymentBtn.textContent = `${PAYMENT_METHODS[method]} ¥${formatMoney(total)}`;
+  }
+
+  function renderPayment() {
+    const draft = state.paymentDraft;
+    if (!draft) return;
+    recalculateDraft();
+    const qty = draft.entries.reduce((sum, item) => sum + item.qty, 0);
+    const selectedCoupon = state.coupons.find(coupon => coupon.id === draft.couponId);
+    const availableCount = state.coupons.filter(coupon => couponDiscount(coupon, draft) > 0).length;
+    paymentAmount.textContent = formatMoney(draft.total);
+    paymentMode.textContent = `${draft.mode} · 共 ${qty} 件商品`;
+    paymentCount.textContent = `共 ${qty} 件`;
+    paymentItems.innerHTML = draft.entries.map(item => {
+      const product = PRODUCT_INDEX.get(item.id);
+      const specs = [item.temp, item.sugar, item.size,
+                     ...(item.addons || []).map(formatAddonName)]
+        .filter(Boolean).join(' · ');
+      return `
+        <div class="order-good">
+          <div class="order-good__thumb"><img src="${escapeHtml(product?.img || '')}" alt="${escapeHtml(item.name)}"></div>
+          <div class="order-good__body"><h4>${escapeHtml(item.name)}</h4><p>${escapeHtml(specs)}</p></div>
+          <div class="order-good__price"><b>¥${formatMoney(item.price * item.qty)}</b><small>×${item.qty}</small></div>
+        </div>`;
+    }).join('');
+
+    const priceRows = [
+      `<p><span>商品小计</span><b>¥${formatMoney(draft.subtotal)}</b></p>`
+    ];
+    if (draft.modeKey === 'delivery') {
+      priceRows.push(`<p><span>配送费</span><b>${draft.deliveryFee ? `¥${formatMoney(draft.deliveryFee)}` : '免配送费'}</b></p>`);
+      priceRows.push(`<p><span>打包费</span><b>¥${formatMoney(draft.packFee)}</b></p>`);
+    }
+    if (draft.activityDiscount) {
+      priceRows.push(`<p class="is-discount"><span>新客立减</span><b>-¥${formatMoney(draft.activityDiscount)}</b></p>`);
+    }
+    priceRows.push(`<p class="is-discount"><span>券优惠</span><b>${selectedCoupon ? `-¥${formatMoney(draft.couponDiscount)}` : '未使用'}</b></p>`);
+    priceRows.push(`<div class="payment-price-total"><span>券后实付</span><b>¥${formatMoney(draft.total)}</b></div>`);
+    paymentPriceDetails.innerHTML = priceRows.join('');
+
+    paymentCouponHint.textContent = selectedCoupon
+      ? selectedCoupon.name
+      : availableCount ? `${availableCount} 张券可用，点击选择` : '暂无满足本单条件的券';
+    paymentCouponValue.textContent = selectedCoupon
+      ? `-¥${formatMoney(draft.couponDiscount)}`
+      : availableCount ? `${availableCount} 张可用` : '不使用券';
+    confirmPaymentBtn.disabled = false;
+    selectPayment(state.paymentMethod);
+  }
+
+  function checkout() {
     if (busy) return;
     const entries = getEntries();
     if (!entries.length) {
       toast('茶篮还是空的');
       return;
     }
-    busy = true;
+    const isDelivery = state.mode === 'delivery';
+    state.paymentMethod = 'wechat';
+    state.paymentDraft = {
+      entries: entries.map(item => ({ ...item, addons: (item.addons || []).slice() })),
+      subtotal: getCartTotal(),
+      deliveryFee: isDelivery ? deliveryFee() : 0,
+      packFee: isDelivery ? deliveryPack() : 0,
+      activityDiscount: isDelivery ? deliveryOff() : 0,
+      couponId: null,
+      couponDiscount: 0,
+      total: 0,
+      mode: modeLabel(),
+      modeKey: state.mode,
+      from: current === 'delivery' ? 'delivery' : 'menu'
+    };
+    const best = bestCoupon(state.paymentDraft);
+    state.paymentDraft.couponId = best ? best.id : null;
+    recalculateDraft();
     closeSheets();
+    renderPayment();
+    go('payment');
+  }
+
+  function confirmPayment() {
+    if (busy) return;
+    const draft = state.paymentDraft;
+    if (!draft || !draft.entries.length) {
+      toast('订单信息已失效，请重新结算');
+      go('menu');
+      return;
+    }
+    const selectedCoupon = draft.couponId
+      ? state.coupons.find(coupon => coupon.id === draft.couponId)
+      : null;
+    if (draft.couponId) {
+      const reason = selectedCoupon ? couponUnavailableReason(selectedCoupon, draft) : '优惠券不存在或已失效';
+      if (reason) {
+        draft.couponId = null;
+        recalculateDraft();
+        renderPayment();
+        toast(`${reason}，请重新确认`);
+        return;
+      }
+    }
+    recalculateDraft();
+    renderPayment();
+    busy = true;
+    confirmPaymentBtn.disabled = true;
+    paymentCouponBtn.disabled = true;
+    confirmPaymentBtn.textContent = '正在支付…';
     brewLayer.classList.add('is-open');
     brewLayer.setAttribute('aria-hidden', 'false');
 
     setTimeout(() => {
       brewLayer.classList.remove('is-open');
       brewLayer.setAttribute('aria-hidden', 'true');
-      const order = createOrder(entries, totalOverride);
+      const couponMeta = selectedCoupon
+        ? { id: selectedCoupon.id, name: selectedCoupon.name, discount: draft.couponDiscount }
+        : null;
+      const order = createOrder(draft.entries, draft.total, PAYMENT_METHODS[state.paymentMethod], couponMeta);
+      if (selectedCoupon) {
+        selectedCoupon.status = 'used';
+        selectedCoupon.usedOrderId = order.id;
+      }
+      syncCouponStats();
+      renderCoupons();
+      state.paymentDraft = null;
       successNo.textContent = order.no;
       successLayer.classList.add('is-open');
       successLayer.setAttribute('aria-hidden', 'false');
@@ -1357,8 +1989,10 @@
         go('orders');
         renderOrders();
         setTimeout(syncOrderTabs, 120);
-        toast('茶已入壶，静候片刻');
+        toast(selectedCoupon ? `支付成功，已核销「${selectedCoupon.name}」` : '支付成功，茶已入壶');
         busy = false;
+        confirmPaymentBtn.disabled = false;
+        paymentCouponBtn.disabled = false;
       }, 1350);
     }, 1900);
   }
@@ -1397,9 +2031,8 @@
     loginBtn.classList.add('is-on');
 
     animateValue($('[data-stat="balance"]'), 128, v => v.toFixed(2));
-    animateValue($('[data-stat="coupon"]'), 3, v => String(Math.round(v)));
+    syncCouponStats();
     animateValue($('[data-stat="points"]'), 520, v => String(Math.round(v)));
-    animateValue($('[data-home-stat="coupon"]'), 3, v => String(Math.round(v)));
     animateValue($('[data-home-stat="points"]'), 520, v => String(Math.round(v)));
 
     const footText = $('.vip-card__foot > span');
@@ -1645,6 +2278,11 @@
 
     // 通用导航
     document.addEventListener('click', e => {
+      const couponEntry = e.target.closest('[data-open-coupons]');
+      if (couponEntry) {
+        openCoupons(couponEntry.dataset.openCoupons);
+        return;
+      }
       const nav = e.target.closest('[data-nav]');
       if (nav) {
         go(nav.dataset.nav);
@@ -1679,7 +2317,7 @@
         closeSheets();
         if (action === 'order') go('menu');
         if (action === 'scan') toast('请对准茶台上的取茶码');
-        if (action === 'coupon') toast('您有 1 张 ¥2 新客券待领取');
+        if (action === 'coupon') openCoupons(current);
         if (action === 'service') toast('茶艺师已收到您的呼唤');
       });
     });
@@ -1763,7 +2401,7 @@
         closeSheets();
         return;
       }
-      checkout(deliveryPayable());
+      checkout();
     });
 
     // 种类
@@ -1877,6 +2515,44 @@
     });
     checkoutBtn.addEventListener('click', () => checkout());
 
+    // 券中心
+    $('#couponBack').addEventListener('click', () => go(state.couponFrom));
+    couponTabs.addEventListener('click', e => {
+      const btn = e.target.closest('[data-coupon-tab]');
+      if (!btn) return;
+      state.couponTab = btn.dataset.couponTab;
+      renderCoupons();
+    });
+    couponList.addEventListener('click', e => {
+      const claimBtn = e.target.closest('[data-claim-coupon]');
+      if (claimBtn) {
+        claimCoupon(claimBtn.dataset.claimCoupon);
+        return;
+      }
+      const useBtn = e.target.closest('[data-use-coupon]');
+      if (useBtn) useCoupon(useBtn.dataset.useCoupon);
+    });
+
+    // 支付
+    paymentCouponBtn.addEventListener('click', () => {
+      if (!busy && state.paymentDraft) openSheet('coupon');
+    });
+    paymentCouponList.addEventListener('click', e => {
+      const btn = e.target.closest('[data-select-coupon]');
+      if (btn && !btn.disabled) selectCoupon(btn.dataset.selectCoupon);
+    });
+    paymentMethods.addEventListener('change', e => {
+      const input = e.target.closest('input[name="paymentMethod"]');
+      if (input && !busy) selectPayment(input.value);
+    });
+    confirmPaymentBtn.addEventListener('click', confirmPayment);
+    $('#paymentBack').addEventListener('click', () => {
+      if (busy) return;
+      const target = state.paymentDraft ? state.paymentDraft.from : 'menu';
+      state.paymentDraft = null;
+      go(target);
+    });
+
     // 订单
     orderTabs.addEventListener('click', e => {
       const btn = e.target.closest('button[data-tab]');
@@ -1891,26 +2567,44 @@
       renderOrders();
     });
     orderList.addEventListener('click', e => {
-      const btn = e.target.closest('[data-again]');
-      if (!btn) return;
-      const order = state.orders.find(o => String(o.id) === btn.dataset.again);
-      if (!order) return;
-      order.items.forEach(item => {
-        const addons = item.addons && item.addons.length ? item.addons.slice() : [];
-        const key = cartKey(item.id, item.temp, item.sugar, item.size, addons);
-        const cur = state.cart.get(key);
-        state.cart.set(key, {
-          id: item.id, temp: item.temp || '', sugar: item.sugar || '',
-          size: item.size || '', addons,
-          qty: (cur ? cur.qty : 0) + item.qty
-        });
-      });
-      updateCartUI();
-      go('menu');
-      renderCart();
-      setTimeout(openCart, 320);
-      toast('已为您重新加入茶篮');
+      const againBtn = e.target.closest('[data-again]');
+      if (againBtn) {
+        const order = state.orders.find(o => String(o.id) === againBtn.dataset.again);
+        reorder(order);
+        return;
+      }
+      const detailBtn = e.target.closest('[data-detail]');
+      if (detailBtn) openOrderDetail(detailBtn.dataset.detail);
     });
+
+    // 订单详情、取茶码与退款
+    $('#orderDetailBack').addEventListener('click', () => go('orders'));
+    $('#detailAgainBtn').addEventListener('click', () => reorder(selectedOrder()));
+    refundBtn.addEventListener('click', openRefundSheet);
+    orderDetailContent.addEventListener('click', e => {
+      const codeBtn = e.target.closest('[data-copy-code]');
+      if (codeBtn) {
+        copyText(codeBtn.dataset.copyCode, '取茶码已复制');
+        return;
+      }
+      const addressBtn = e.target.closest('[data-copy-address]');
+      if (addressBtn) {
+        copyText(addressBtn.dataset.copyAddress, '门店地址已复制');
+        return;
+      }
+      if (e.target.closest('[data-refund-open]')) openRefundSheet();
+    });
+    $('#refundReasons').addEventListener('click', e => {
+      const btn = e.target.closest('[data-refund-reason]');
+      if (!btn) return;
+      state.refundReason = btn.dataset.refundReason;
+      $$('[data-refund-reason]', $('#refundReasons')).forEach(item => {
+        const active = item === btn;
+        item.classList.toggle('is-active', active);
+        item.setAttribute('aria-pressed', String(active));
+      });
+    });
+    $('#refundSubmit').addEventListener('click', applyRefund);
 
     // 我的
     loginBtn.addEventListener('click', login);
@@ -1920,6 +2614,10 @@
         const key = row.dataset.row;
         if (key === 'orders') {
           go('orders');
+          return;
+        }
+        if (key === 'coupons') {
+          openCoupons('profile');
           return;
         }
         const messages = {
@@ -2066,6 +2764,7 @@
     renderCats();
     renderProducts();
     renderOrders();
+    renderCoupons();
     updateModeUI();
     syncStoreHeader();
     updateTabs();

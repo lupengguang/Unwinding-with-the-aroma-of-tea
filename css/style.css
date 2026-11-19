@@ -495,6 +495,7 @@ svg{display:block;}
 .segmented__btn{
   position:relative;z-index:1;width:50%;height:100%;border-radius:999px;
   font-size:11px;letter-spacing:.1em;color:#7D8169;transition:color .3s;
+  text-align:center;display:flex;justify-content:center;align-items:center;
 }
 .segmented__btn.is-active{color:#F7F5E9;}
 
@@ -1012,6 +1013,296 @@ svg{display:block;}
   transition:background .2s,transform .2s;
 }
 .order-card__again button:active{transform:scale(.94);background:rgba(95,107,60,.08);}
+.order-card__main{display:block;width:100%;text-align:left;border-radius:inherit;}
+.order-card__main:focus-visible,.order-detail-actions button:focus-visible,.pickup-code:focus-visible{outline:2px solid var(--green-500);outline-offset:3px;}
+.order-card__actions{display:flex;justify-content:flex-end;gap:8px;margin-top:11px;}
+.order-card__actions button{
+  font-size:10px;letter-spacing:.08em;color:var(--green-600);
+  padding:5px 12px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(95,107,60,.34);
+  transition:background .2s,transform .2s;
+}
+.order-card__actions button:active{transform:scale(.94);background:rgba(95,107,60,.08);}
+.order-card__status.is-refunding{background:#F2E9D6;color:#8A6320;}
+.order-card__status.is-refunded{background:#ECECE4;color:#858777;animation:none;}
+.order-card__status.is-refunded::before{background:#A5A797;animation:none;}
+
+/* 订单详情 */
+.phone[data-view="orderDetail"] .tabbar{transform:translateY(calc(100% + 34px));opacity:0;pointer-events:none;}
+.screen--order-detail{background:#F5F2E7;}
+.order-detail-head{
+  position:relative;z-index:20;flex:none;height:102px;padding:52px 16px 0;
+  display:flex;align-items:center;justify-content:space-between;background:rgba(247,245,233,.96);
+}
+.order-detail-head .auth-back{width:40px;height:40px;background:#FDFCF5;box-shadow:inset 0 0 0 1px rgba(47,58,28,.07);}
+.order-detail-head .mini-capsule{width:78px;}
+.order-detail-head__title{text-align:center;}
+.order-detail-head__title h2{font-size:16px;font-weight:600;letter-spacing:.08em;color:#252B1D;}
+.order-detail-head__title p{margin-top:3px;font-family:var(--font-latin);font-size:7px;letter-spacing:.2em;color:#A1A48E;}
+.order-detail-scroll{
+  position:absolute;inset:102px 0 0;overflow-y:auto;overflow-x:hidden;
+  padding:6px 16px 112px;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.order-detail-scroll::-webkit-scrollbar{display:none;}
+.order-status-card{
+  position:relative;overflow:hidden;min-height:142px;margin-bottom:12px;padding:23px 22px;border-radius:24px;
+  display:flex;align-items:center;gap:17px;color:#F5F3E6;
+  background:linear-gradient(125deg,#35421F,#596839);
+  box-shadow:0 22px 34px -26px rgba(38,47,20,.9);
+}
+.order-status-card::after{
+  content:"茶";position:absolute;right:-4px;bottom:-34px;font-family:var(--font-serif);font-size:116px;
+  color:rgba(239,242,218,.055);transform:rotate(-9deg);
+}
+.order-status-card.is-ready{background:linear-gradient(125deg,#657440,#89945E);}
+.order-status-card.is-refunding{background:linear-gradient(125deg,#76623D,#9B8356);}
+.order-status-card.is-refunded{background:linear-gradient(125deg,#626658,#858979);}
+.order-status-card__icon{
+  position:relative;z-index:1;flex:none;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(247,245,233,.12);box-shadow:inset 0 0 0 1px rgba(247,245,233,.18);
+}
+.order-status-card__icon .ic{width:25px;height:25px;}
+.order-status-card__body{position:relative;z-index:1;min-width:0;}
+.order-status-card__body small{font-family:var(--font-latin);font-size:7px;letter-spacing:.2em;color:rgba(245,243,230,.62);}
+.order-status-card__body h2{margin-top:6px;font-family:var(--font-serif);font-size:24px;letter-spacing:.08em;}
+.order-status-card__body p{margin-top:8px;font-size:10px;line-height:1.65;letter-spacing:.04em;color:rgba(245,243,230,.76);}
+.order-detail-card{
+  margin-bottom:12px;padding:17px;border-radius:20px;background:#FCFAF1;
+  box-shadow:inset 0 0 0 1px rgba(47,58,28,.045),0 16px 28px -28px rgba(47,58,28,.8);
+  animation:riseIn .45s var(--ease-out) both;
+}
+.detail-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px;}
+.detail-card-head h3{font-size:13px;font-weight:600;letter-spacing:.05em;color:#303724;}
+.detail-card-head small{font-size:8.5px;letter-spacing:.04em;color:#9A9E86;}
+.pickup-card{text-align:center;background:linear-gradient(145deg,#FDFCF5,#F1F2E3);}
+.pickup-card .detail-card-head{text-align:left;margin-bottom:8px;}
+.pickup-code{display:flex;align-items:center;justify-content:center;gap:15px;width:100%;padding:10px 0 6px;color:#344020;}
+.pickup-code span{font-family:var(--font-latin);font-size:34px;font-weight:600;letter-spacing:.13em;font-variant-numeric:tabular-nums;}
+.pickup-code small{align-self:flex-end;margin-bottom:8px;font-size:8px;color:#92977C;}
+.pickup-card__tip{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:7px;font-size:9px;color:#8B9077;}
+.pickup-card__tip i{width:5px;height:5px;border-radius:50%;background:var(--green-500);box-shadow:0 0 0 4px rgba(111,126,70,.09);}
+.order-progress{display:flex;list-style:none;padding:3px 0 1px;}
+.order-progress__step{position:relative;flex:1;text-align:center;color:#A6A993;}
+.order-progress__step::before{content:"";position:absolute;top:11px;left:-50%;width:100%;height:1px;background:#DCDED0;}
+.order-progress__step:first-child::before{display:none;}
+.order-progress__dot{
+  position:relative;z-index:1;width:23px;height:23px;margin:0 auto 9px;border-radius:50%;display:grid;place-items:center;
+  background:#E8E9DE;box-shadow:0 0 0 4px #FCFAF1;font-size:9px;font-variant-numeric:tabular-nums;
+}
+.order-progress__step b{display:block;font-size:9.5px;font-weight:500;letter-spacing:.02em;}
+.order-progress__step small{display:block;margin-top:5px;font-size:7.5px;color:#B0B29F;}
+.order-progress__step.is-done{color:#657344;}
+.order-progress__step.is-done::before{background:#A9B78A;}
+.order-progress__step.is-done .order-progress__dot{background:#DCE4C9;color:#536333;}
+.order-progress__step.is-current{color:#344020;}
+.order-progress__step.is-current::before{background:#A9B78A;}
+.order-progress__step.is-current .order-progress__dot{background:var(--green-600);color:#F7F5E9;box-shadow:0 0 0 5px rgba(111,126,70,.12);animation:progressBreath 2s ease-in-out infinite;}
+.order-progress__step.is-current b{font-weight:600;}
+@keyframes progressBreath{50%{box-shadow:0 0 0 8px rgba(111,126,70,.055);}}
+.order-store__top{display:flex;align-items:flex-start;gap:11px;}
+.order-store__icon{flex:none;width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:#EBEEDB;color:var(--green-600);}
+.order-store__icon .ic{width:18px;height:18px;}
+.order-store__body{flex:1;min-width:0;}
+.order-store__body h3{font-size:12px;line-height:1.5;color:#343B28;}
+.order-store__body p{margin-top:5px;font-size:9px;line-height:1.65;color:#949880;}
+.order-store__meta{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:8.5px;color:#7F866C;}
+.order-store__meta b{font-weight:500;color:var(--green-600);}
+.order-store__copy{flex:none;padding:6px 9px;border-radius:999px;font-size:8.5px;color:var(--green-600);box-shadow:inset 0 0 0 1px rgba(95,107,60,.25);}
+.order-good{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid rgba(47,58,28,.06);}
+.order-good:last-child{padding-bottom:0;border-bottom:0;}
+.order-good__thumb{flex:none;width:50px;height:50px;border-radius:13px;overflow:hidden;background:#F0EFDF;}
+.order-good__thumb img{width:100%;height:100%;object-fit:cover;}
+.order-good__body{flex:1;min-width:0;}
+.order-good__body h4{font-size:11.5px;font-weight:500;color:#383F2C;}
+.order-good__body p{margin-top:5px;font-size:8px;line-height:1.55;color:#9B9E89;}
+.order-good__price{text-align:right;flex:none;}
+.order-good__price b{display:block;font-size:11px;font-weight:500;color:#4D553D;}
+.order-good__price small{display:block;margin-top:5px;font-size:8px;color:#9DA18A;}
+.order-meta{display:flex;flex-direction:column;gap:11px;}
+.order-meta>div{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;font-size:9.5px;line-height:1.55;}
+.order-meta dt{color:#969A83;flex:none;}
+.order-meta dd{text-align:right;color:#535B43;word-break:break-all;}
+.order-meta .is-total{padding-top:11px;border-top:1px dashed rgba(47,58,28,.13);align-items:center;}
+.order-meta .is-total dd{font-size:17px;font-weight:600;color:#2C3420;}
+.order-refund-note{display:flex;align-items:center;gap:12px;background:#F4EDDE;}
+.order-refund-note__icon{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(154,126,73,.11);color:#927443;}
+.order-refund-note__icon .ic{width:16px;height:16px;}
+.order-refund-note>div{flex:1;min-width:0;}
+.order-refund-note h3{font-size:11px;color:#765D34;}
+.order-refund-note p{margin-top:4px;font-size:8.5px;line-height:1.55;color:#9B8562;}
+.order-refund-note button{font-size:9px;color:#806338;text-decoration:underline;text-underline-offset:3px;}
+.order-detail-actions{
+  position:absolute;left:0;right:0;bottom:0;z-index:25;display:flex;gap:10px;padding:13px 16px 18px;
+  background:linear-gradient(180deg,rgba(245,242,231,0),#F5F2E7 25%);
+}
+.order-detail-actions button{height:48px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:.1em;transition:transform .2s,background .2s;}
+.order-detail-actions button:active{transform:scale(.96);}
+.order-detail-actions__refund{width:40%;color:#7C806B;background:#FCFAF1;box-shadow:inset 0 0 0 1px rgba(47,58,28,.14);}
+.order-detail-actions__again{flex:1;color:#F7F5E9;background:var(--green-600);box-shadow:0 14px 22px -15px rgba(47,58,28,.8);}
+
+/* 支付确认 */
+.phone[data-view="payment"] .tabbar{transform:translateY(calc(100% + 34px));opacity:0;pointer-events:none;}
+.payment-scroll{padding-bottom:112px;}
+.payment-amount-card{
+  position:relative;overflow:hidden;margin-bottom:12px;padding:22px;border-radius:24px;text-align:center;
+  color:#F5F3E6;background:linear-gradient(125deg,#35421F,#596839);box-shadow:0 22px 34px -26px rgba(38,47,20,.9);
+}
+.payment-amount-card::after{content:"付";position:absolute;right:4px;bottom:-42px;font-family:var(--font-serif);font-size:112px;color:rgba(239,242,218,.05);transform:rotate(-8deg);}
+.payment-amount-card>small{position:relative;z-index:1;font-family:var(--font-latin);font-size:7px;letter-spacing:.2em;color:rgba(245,243,230,.62);}
+.payment-amount{position:relative;z-index:1;display:flex;align-items:baseline;justify-content:center;gap:5px;margin-top:9px;font-family:var(--font-latin);}
+.payment-amount span{font-size:18px;font-weight:500;}
+.payment-amount strong{font-size:40px;font-weight:600;line-height:1.1;letter-spacing:.02em;font-variant-numeric:tabular-nums;}
+.payment-amount-card p{position:relative;z-index:1;margin-top:10px;font-size:9px;letter-spacing:.05em;color:rgba(245,243,230,.72);}
+.payment-summary .order-good{padding:8px 0;}
+.payment-methods{display:flex;flex-direction:column;gap:8px;}
+.payment-method{position:relative;display:flex;align-items:center;gap:12px;padding:12px;border-radius:15px;cursor:pointer;background:#F5F3E9;box-shadow:inset 0 0 0 1px rgba(47,58,28,.045);transition:background .2s,box-shadow .2s,transform .2s;}
+.payment-method:active{transform:scale(.985);}
+.payment-method.is-active{background:#EEF1E3;box-shadow:inset 0 0 0 1px rgba(95,107,60,.34);}
+.payment-method:has(input:focus-visible){outline:2px solid var(--green-500);outline-offset:2px;}
+.payment-method input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;}
+.payment-method__brand{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-family:var(--font-serif);font-size:19px;font-weight:600;}
+.payment-method__brand .ic{width:21px;height:21px;}
+.payment-method__brand--wechat{color:#168447;background:#E2F1E4;}
+.payment-method__brand--alipay{color:#1677C8;background:#E3EEF6;}
+.payment-method__brand--unionpay{color:#B64B48;background:#F4E6E1;}
+.payment-method__body{flex:1;min-width:0;}
+.payment-method__body b{display:block;font-size:11.5px;font-weight:600;color:#363E2A;}
+.payment-method__body small{display:block;margin-top:5px;font-size:8px;color:#969B84;}
+.payment-method__check{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:transparent;box-shadow:inset 0 0 0 1px #C9CCBB;transition:color .2s,background .2s,box-shadow .2s;}
+.payment-method__check .ic{width:11px;height:11px;stroke-width:2.4;}
+.payment-method.is-active .payment-method__check{color:#F7F5E9;background:var(--green-600);box-shadow:inset 0 0 0 1px var(--green-600);}
+.payment-notice{display:flex;align-items:center;justify-content:center;gap:6px;padding:2px 0 8px;font-size:8.5px;line-height:1.6;color:#92977F;}
+.payment-notice .ic{width:12px;height:12px;color:var(--green-500);}
+.payment-actions button{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
+.payment-actions button:disabled{cursor:wait;opacity:.68;transform:none;}
+
+/* 支付价格与选券 */
+.payment-price-details{margin-top:9px;padding-top:10px;border-top:1px dashed rgba(47,58,28,.13);}
+.payment-price-details p{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 0;font-size:9px;color:#92977F;}
+.payment-price-details p b{font-weight:500;color:#5A624A;font-variant-numeric:tabular-nums;}
+.payment-price-details p.is-discount b{color:#A77732;}
+.payment-price-total{display:flex;align-items:center;justify-content:space-between;margin-top:7px;padding-top:11px;border-top:1px solid rgba(47,58,28,.07);}
+.payment-price-total span{font-size:10px;color:#61694F;}
+.payment-price-total b{font-family:var(--font-latin);font-size:21px;font-weight:600;color:#344020;font-variant-numeric:tabular-nums;}
+.payment-coupon-card{padding:5px 13px;}
+.payment-coupon-btn{width:100%;min-height:58px;display:flex;align-items:center;gap:11px;text-align:left;}
+.payment-coupon-btn__icon{flex:none;width:35px;height:35px;border-radius:12px;display:grid;place-items:center;background:#EEE8D6;color:#A67935;}
+.payment-coupon-btn__icon .ic{width:18px;height:18px;}
+.payment-coupon-btn__body{flex:1;min-width:0;}
+.payment-coupon-btn__body b{display:block;font-size:11.5px;font-weight:600;color:#3B432E;}
+.payment-coupon-btn__body small{display:block;overflow:hidden;margin-top:5px;font-size:8.5px;color:#989C86;text-overflow:ellipsis;white-space:nowrap;}
+.payment-coupon-btn__value{display:flex;align-items:center;gap:6px;flex:none;color:#A47431;}
+.payment-coupon-btn__value strong{font-size:10px;font-weight:600;font-variant-numeric:tabular-nums;}
+.payment-coupon-btn__value .ic{width:12px;height:12px;color:#A5A993;}
+.payment-coupon-btn:focus-visible,.coupon-card__action:focus-visible,.coupon-tabs button:focus-visible,.payment-coupon-option:focus-visible{outline:2px solid var(--green-500);outline-offset:2px;}
+.payment-coupon-btn:disabled{cursor:wait;opacity:.6;}
+.order-meta dd.is-discount{color:#A47431;}
+
+/* 券中心 */
+.phone[data-view="coupons"] .tabbar{transform:translateY(calc(100% + 34px));opacity:0;pointer-events:none;}
+.coupon-scroll{padding-bottom:34px;}
+.coupon-hero{
+  position:relative;overflow:hidden;min-height:132px;margin-bottom:16px;padding:23px 21px;border-radius:24px;
+  display:flex;align-items:center;gap:16px;color:#F5F3E6;
+  background:linear-gradient(125deg,#35421F,#5F7040);box-shadow:0 22px 34px -26px rgba(38,47,20,.9);
+}
+.coupon-hero::after{content:"券";position:absolute;right:-2px;bottom:-47px;font-family:var(--font-serif);font-size:126px;color:rgba(239,242,218,.055);transform:rotate(-8deg);}
+.coupon-hero__icon{position:relative;z-index:1;flex:none;width:53px;height:53px;border-radius:18px;display:grid;place-items:center;background:rgba(247,245,233,.12);box-shadow:inset 0 0 0 1px rgba(247,245,233,.17);transform:rotate(-5deg);}
+.coupon-hero__icon .ic{width:26px;height:26px;}
+.coupon-hero>div{position:relative;z-index:1;}
+.coupon-hero small{font-family:var(--font-latin);font-size:7px;letter-spacing:.18em;color:rgba(245,243,230,.62);}
+.coupon-hero h2{margin-top:7px;font-family:var(--font-serif);font-size:20px;font-weight:600;letter-spacing:.05em;}
+.coupon-hero h2 strong{display:inline-block;margin-right:4px;font-family:var(--font-latin);font-size:31px;font-weight:600;line-height:1;}
+.coupon-hero p{margin-top:8px;font-size:9px;letter-spacing:.04em;color:rgba(245,243,230,.72);}
+.coupon-tabs{position:sticky;top:-6px;z-index:8;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:0 -2px 14px;padding:6px;border-radius:15px;background:rgba(239,237,223,.94);box-shadow:inset 0 0 0 1px rgba(47,58,28,.045);backdrop-filter:blur(12px);}
+.coupon-tabs button{height:33px;border-radius:10px;font-size:9.5px;color:#888E74;transition:color .2s,background .2s,box-shadow .2s;}
+.coupon-tabs button.is-active{color:#F7F5E9;background:var(--green-600);box-shadow:0 7px 14px -10px rgba(47,58,28,.85);}
+.coupon-list{display:flex;flex-direction:column;gap:13px;}
+.coupon-card{position:relative;overflow:hidden;border-radius:20px;background:#FCFAF1;box-shadow:inset 0 0 0 1px rgba(47,58,28,.05),0 16px 26px -25px rgba(47,58,28,.75);animation:riseIn .45s var(--ease-out) both;}
+.coupon-card:nth-child(2){animation-delay:.04s}.coupon-card:nth-child(3){animation-delay:.08s}.coupon-card:nth-child(4){animation-delay:.12s}.coupon-card:nth-child(5){animation-delay:.16s}.coupon-card:nth-child(6){animation-delay:.2s}
+.coupon-card__content{position:relative;display:grid;grid-template-columns:105px minmax(0,1fr);}
+.coupon-card__content::before,.coupon-card__content::after{content:"";position:absolute;z-index:2;left:98px;width:14px;height:14px;border-radius:50%;background:#F5F2E7;box-shadow:inset 0 0 0 1px rgba(47,58,28,.035);}
+.coupon-card__content::before{top:-7px}.coupon-card__content::after{bottom:-7px}
+.coupon-face{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:116px;padding:15px 10px;border-right:1px dashed rgba(71,82,43,.2);color:#586839;background:#E9EDDC;}
+.coupon-face__value{display:flex;align-items:baseline;justify-content:center;gap:2px;font-family:var(--font-latin);font-variant-numeric:tabular-nums;}
+.coupon-face__value strong{font-size:35px;font-weight:600;line-height:1;letter-spacing:-.02em;}
+.coupon-face__value span{font-size:16px;font-weight:600;}
+.coupon-face>small{margin-top:9px;font-size:8px;font-weight:600;letter-spacing:.12em;}
+.coupon-card--discount .coupon-face{color:#A36E28;background:#F4E8D1;border-right-color:rgba(163,110,40,.22);}
+.coupon-card--delivery .coupon-face{color:#47715E;background:#E3ECE5;border-right-color:rgba(71,113,94,.22);}
+.coupon-card__body{min-width:0;padding:17px 13px 13px 16px;}
+.coupon-card__title{display:flex;align-items:flex-start;justify-content:space-between;gap:7px;}
+.coupon-card__title h3{font-size:12px;font-weight:600;line-height:1.45;color:#36402A;}
+.coupon-card__title>span{flex:none;padding:3px 5px;border-radius:5px;font-size:7px;color:#68774C;background:#EDF0E2;}
+.coupon-card__body p{margin-top:8px;font-size:10px;font-weight:500;color:#5E674D;}
+.coupon-card__body>small{display:block;margin-top:6px;font-size:8px;line-height:1.45;color:#9A9E88;}
+.coupon-card__footer{min-height:46px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px 9px 16px;border-top:1px dashed rgba(47,58,28,.1);background:rgba(246,244,233,.66);}
+.coupon-card__footer>span{flex:1;min-width:0;font-size:8px;line-height:1.5;color:#A0A38E;}
+.coupon-card__action{flex:none;min-width:61px;height:28px;padding:0 11px;border-radius:999px;font-size:8.5px;font-weight:500;color:#F8F6EB;background:var(--green-600);box-shadow:0 7px 12px -9px rgba(47,58,28,.8);transition:transform .2s,opacity .2s;}
+.coupon-card__action:active{transform:scale(.94);}
+.coupon-card__action--claim{color:#7E5725;background:#F0DFBD;box-shadow:inset 0 0 0 1px rgba(163,110,40,.12);}
+.coupon-card.is-claimable .coupon-card__title>span{color:#9B6B2C;background:#F5E9D3;}
+.coupon-card.is-used .coupon-card__content{opacity:.5;filter:saturate(.2);}
+.coupon-card.is-used .coupon-card__footer>span{text-decoration:line-through;}
+.coupon-card__action:disabled{cursor:default;color:#9A9D8B;background:#E6E5DB;box-shadow:none;}
+.coupon-center-tip{padding:20px 0 4px;text-align:center;font-size:8px;line-height:1.9;letter-spacing:.06em;color:#AAAD98;}
+.coupon-empty{padding:52px 20px;text-align:center;color:#A3A791;}
+.coupon-empty>.ic{width:34px;height:34px;margin:0 auto 14px;color:#B1B69D;}
+.coupon-empty h3{font-size:12px;font-weight:500;color:#737B60;}
+.coupon-empty p{margin-top:8px;font-size:9px;}
+.profile-row__meta{display:flex;align-items:center;gap:8px;}
+.profile-row__meta b{font-size:8.5px;font-weight:500;color:#9B7A42;}
+
+/* 支付选券弹层 */
+.sheet--coupons{max-height:88%;}
+.payment-coupon-list{display:flex;flex-direction:column;gap:10px;overflow-y:auto;padding:2px 2px 8px;scrollbar-width:none;}
+.payment-coupon-list::-webkit-scrollbar{display:none;}
+.payment-coupon-option{position:relative;width:100%;min-height:94px;display:grid;grid-template-columns:78px minmax(0,1fr) 20px;align-items:center;gap:12px;padding:10px 12px 10px 0;border-radius:17px;text-align:left;background:#F4F2E7;box-shadow:inset 0 0 0 1px rgba(47,58,28,.055);transition:background .2s,box-shadow .2s,transform .2s;}
+.payment-coupon-option:not(:disabled):active{transform:scale(.985);}
+.payment-coupon-option.is-active{background:#EDF1E2;box-shadow:inset 0 0 0 1px rgba(95,107,60,.38);}
+.payment-coupon-option .coupon-face{min-height:72px;padding:8px 7px;border-radius:12px 0 0 12px;border-right:1px dashed rgba(71,82,43,.18);}
+.payment-coupon-option .coupon-face__value strong{font-size:26px;}
+.payment-coupon-option .coupon-face__value span{font-size:12px;}
+.payment-coupon-option .coupon-face>small{margin-top:5px;font-size:7px;}
+.payment-coupon-option__body{min-width:0;}
+.payment-coupon-option__body>b{display:block;font-size:10.5px;font-weight:600;color:#3C442F;}
+.payment-coupon-option__body>small{display:block;margin-top:5px;font-size:7.5px;line-height:1.5;color:#999D87;}
+.payment-coupon-option__body>em{display:block;margin-top:5px;font-size:8px;font-style:normal;color:#A47431;}
+.payment-coupon-option__check{width:19px;height:19px;border-radius:50%;display:grid;place-items:center;color:transparent;box-shadow:inset 0 0 0 1px #C8CCBA;}
+.payment-coupon-option__check .ic{width:10px;height:10px;stroke-width:2.4;}
+.payment-coupon-option.is-active .payment-coupon-option__check{color:#F7F5E9;background:var(--green-600);box-shadow:inset 0 0 0 1px var(--green-600);}
+.payment-coupon-option.is-disabled{cursor:not-allowed;opacity:.5;filter:saturate(.3);}
+.payment-coupon-option--none{grid-template-columns:36px minmax(0,1fr) 20px;min-height:66px;padding:10px 12px;}
+.payment-coupon-option__none-icon{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;color:#969C83;background:#E8E8DC;}
+.payment-coupon-option__none-icon .ic{width:14px;height:14px;}
+.coupon-sheet-tip{padding:9px 4px 0;text-align:center;font-size:8px;line-height:1.65;color:#A3A792;}
+
+/* 退款弹层 */
+.sheet--refund{max-height:88%;}
+.refund-amount{display:grid;grid-template-columns:1fr auto;align-items:center;padding:14px 16px;border-radius:16px;background:#F3F1E5;}
+.refund-amount span{font-size:11px;color:#656D53;}
+.refund-amount b{grid-row:span 2;font-family:var(--font-latin);font-size:25px;color:#344020;}
+.refund-amount small{margin-top:4px;font-size:8.5px;color:#9B9F88;}
+.refund-reasons{border:0;margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.refund-reasons legend{margin-bottom:11px;font-size:11px;font-weight:600;color:#40482F;}
+.refund-reasons button{height:38px;border-radius:11px;font-size:10px;color:#7E846C;background:#F2F1E6;box-shadow:inset 0 0 0 1px rgba(47,58,28,.05);}
+.refund-reasons button.is-active{color:#43532B;background:#E8EDDA;box-shadow:inset 0 0 0 1px rgba(95,107,60,.38);}
+.refund-note{display:block;margin-top:16px;}
+.refund-note>span{display:block;margin-bottom:8px;font-size:10px;color:#555E43;}
+.refund-note>span small{margin-left:5px;color:#A4A792;font-size:8px;}
+.refund-note textarea{width:100%;resize:none;border:0;outline:0;border-radius:13px;padding:11px 12px;background:#F3F1E6;color:#3E462F;font:inherit;font-size:10px;line-height:1.6;}
+.refund-note textarea::placeholder{color:#AAAD9A;}
+.refund-tip{margin:10px 0 14px;font-size:8.5px;line-height:1.6;color:#A0A38E;}
+.refund-status{text-align:center;padding:10px 0 0;}
+.refund-status[hidden],.refund-apply[hidden]{display:none;}
+.refund-status__icon{width:58px;height:58px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;background:#E9EDDA;color:var(--green-600);}
+.refund-status__icon .ic{width:26px;height:26px;}
+.refund-status h4{font-family:var(--font-serif);font-size:20px;color:#364125;}
+.refund-status>p{margin-top:8px;font-size:10px;line-height:1.6;color:#949980;}
+.refund-status__meta{margin:20px 0;padding:14px 16px;border-radius:15px;background:#F3F1E5;display:flex;flex-direction:column;gap:11px;}
+.refund-status__meta>div{display:flex;justify-content:space-between;gap:12px;font-size:10px;}
+.refund-status__meta dt{color:#999D86;}
+.refund-status__meta dd{color:#515A40;}
+.refund-status .sheet__ghost{width:100%;}
 
 /* ============================================================
    Profile

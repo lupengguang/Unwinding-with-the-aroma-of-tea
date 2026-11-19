@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;900&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=20261119-coupons">
 </head>
 <body>
 
@@ -309,7 +309,7 @@
                 <span class="stars">★★★</span>
                 <b>你好茶友~</b>
               </div>
-              <button class="member-strip__cell" data-nav="profile">
+              <button class="member-strip__cell" data-open-coupons="home">
                 <span>优惠券</span><b data-home-stat="coupon">***</b>
               </button>
               <button class="member-strip__cell" data-nav="profile">
@@ -622,6 +622,140 @@
         </div>
       </section>
 
+      <!-- ================= 订单详情 ================= -->
+      <section class="screen screen--order-detail" id="screen-order-detail" data-screen="orderDetail" aria-label="订单详情">
+        <header class="order-detail-head">
+          <button class="auth-back press" id="orderDetailBack" aria-label="返回订单列表">
+            <svg class="ic"><use href="#i-chevron"/></svg>
+          </button>
+          <div class="order-detail-head__title">
+            <h2>订单详情</h2>
+            <p>ORDER DETAILS</p>
+          </div>
+          <button class="mini-capsule press" data-capsule aria-label="小程序菜单">
+            <span class="capsule-dots"><i></i><i></i><i></i></span>
+            <span class="capsule-line"></span>
+            <span class="capsule-ring"></span>
+          </button>
+        </header>
+
+        <div class="order-detail-scroll" id="orderDetailContent" data-scroll="orderDetail"></div>
+
+        <footer class="order-detail-actions" id="orderDetailActions">
+          <button class="order-detail-actions__refund press" id="refundBtn">申请退款</button>
+          <button class="order-detail-actions__again press" id="detailAgainBtn">再来一单</button>
+        </footer>
+      </section>
+
+      <!-- ================= 支付确认 ================= -->
+      <section class="screen screen--order-detail screen--payment" id="screen-payment" data-screen="payment" aria-label="支付订单">
+        <header class="order-detail-head">
+          <button class="auth-back press" id="paymentBack" aria-label="返回修改订单">
+            <svg class="ic"><use href="#i-chevron"/></svg>
+          </button>
+          <div class="order-detail-head__title">
+            <h2>支付订单</h2>
+            <p>SECURE CHECKOUT</p>
+          </div>
+          <button class="mini-capsule press" data-capsule aria-label="小程序菜单">
+            <span class="capsule-dots"><i></i><i></i><i></i></span>
+            <span class="capsule-line"></span>
+            <span class="capsule-ring"></span>
+          </button>
+        </header>
+
+        <div class="order-detail-scroll payment-scroll" data-scroll="payment">
+          <section class="payment-amount-card">
+            <small>JIE CHA XIANG · PAYMENT</small>
+            <div class="payment-amount"><span>¥</span><strong id="paymentAmount">0</strong></div>
+            <p id="paymentMode">门店自取 · 共 0 件商品</p>
+          </section>
+
+          <section class="order-detail-card payment-summary">
+            <div class="detail-card-head"><h3>订单摘要</h3><small id="paymentCount">共 0 件</small></div>
+            <div class="order-goods" id="paymentItems"></div>
+            <div class="payment-price-details" id="paymentPriceDetails"></div>
+          </section>
+
+          <section class="order-detail-card payment-coupon-card">
+            <button class="payment-coupon-btn press" id="paymentCouponBtn" aria-haspopup="dialog">
+              <span class="payment-coupon-btn__icon" aria-hidden="true"><svg class="ic"><use href="#i-ticket"/></svg></span>
+              <span class="payment-coupon-btn__body"><b>优惠券</b><small id="paymentCouponHint">正在计算可用优惠</small></span>
+              <span class="payment-coupon-btn__value"><strong id="paymentCouponValue">去选择</strong><svg class="ic"><use href="#i-chevron"/></svg></span>
+            </button>
+          </section>
+
+          <section class="order-detail-card payment-methods-card">
+            <div class="detail-card-head"><h3 id="paymentMethodsTitle">选择支付方式</h3><small>安全支付</small></div>
+            <div class="payment-methods" id="paymentMethods" role="radiogroup" aria-labelledby="paymentMethodsTitle">
+              <label class="payment-method is-active">
+                <input type="radio" name="paymentMethod" value="wechat" checked>
+                <span class="payment-method__brand payment-method__brand--wechat" aria-hidden="true"><svg class="ic"><use href="#i-wechat"/></svg></span>
+                <span class="payment-method__body"><b>微信支付</b><small>推荐使用，安全快捷</small></span>
+                <span class="payment-method__check" aria-hidden="true"><svg class="ic"><use href="#i-check"/></svg></span>
+              </label>
+              <label class="payment-method">
+                <input type="radio" name="paymentMethod" value="alipay">
+                <span class="payment-method__brand payment-method__brand--alipay" aria-hidden="true">支</span>
+                <span class="payment-method__body"><b>支付宝</b><small>支付宝账户安全支付</small></span>
+                <span class="payment-method__check" aria-hidden="true"><svg class="ic"><use href="#i-check"/></svg></span>
+              </label>
+              <label class="payment-method">
+                <input type="radio" name="paymentMethod" value="unionpay">
+                <span class="payment-method__brand payment-method__brand--unionpay" aria-hidden="true">云</span>
+                <span class="payment-method__body"><b>云闪付</b><small>银联安全支付</small></span>
+                <span class="payment-method__check" aria-hidden="true"><svg class="ic"><use href="#i-check"/></svg></span>
+              </label>
+            </div>
+          </section>
+
+          <p class="payment-notice"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>演示环境仅模拟支付，不会发生真实扣款</p>
+        </div>
+
+        <footer class="order-detail-actions payment-actions">
+          <button class="order-detail-actions__again press" id="confirmPaymentBtn">微信支付 ¥0</button>
+        </footer>
+      </section>
+
+      <!-- ================= 券中心 ================= -->
+      <section class="screen screen--order-detail screen--coupons" id="screen-coupons" data-screen="coupons" aria-label="券中心">
+        <header class="order-detail-head">
+          <button class="auth-back press" id="couponBack" aria-label="返回上一页">
+            <svg class="ic"><use href="#i-chevron"/></svg>
+          </button>
+          <div class="order-detail-head__title">
+            <h2>券中心</h2>
+            <p>TEA COUPON WALLET</p>
+          </div>
+          <button class="mini-capsule press" data-capsule aria-label="小程序菜单">
+            <span class="capsule-dots"><i></i><i></i><i></i></span>
+            <span class="capsule-line"></span>
+            <span class="capsule-ring"></span>
+          </button>
+        </header>
+
+        <div class="order-detail-scroll coupon-scroll" data-scroll="coupons">
+          <section class="coupon-hero">
+            <span class="coupon-hero__icon" aria-hidden="true"><svg class="ic"><use href="#i-ticket"/></svg></span>
+            <div>
+              <small>JIE CHA XIANG · TEA GIFT</small>
+              <h2><strong id="couponAvailableCount">0</strong> 张好茶礼券</h2>
+              <p>把一杯茶的欢喜，留给下一次相见</p>
+            </div>
+          </section>
+
+          <div class="coupon-tabs" id="couponTabs" role="tablist" aria-label="优惠券筛选">
+            <button class="is-active" data-coupon-tab="all" role="tab" aria-selected="true">全部</button>
+            <button data-coupon-tab="available" role="tab" aria-selected="false">可使用</button>
+            <button data-coupon-tab="claimable" role="tab" aria-selected="false">待领取</button>
+            <button data-coupon-tab="used" role="tab" aria-selected="false">已使用</button>
+          </div>
+
+          <div class="coupon-list" id="couponList" aria-live="polite"></div>
+          <p class="coupon-center-tip">每单限用一张券 · 支付成功后核销<br>满减、折扣与配送券按各自规则使用</p>
+        </div>
+      </section>
+
       <!-- ================= 我的 ================= -->
       <section class="screen" id="screen-profile" data-screen="profile" aria-label="我的">
         <div class="screen__scroll" data-scroll="profile">
@@ -676,6 +810,9 @@
           <section class="profile-menu">
             <button class="profile-row press" data-row="orders">
               <span>订单中心</span><svg class="ic"><use href="#i-chevron"/></svg>
+            </button>
+            <button class="profile-row press" data-row="coupons">
+              <span>券中心</span><span class="profile-row__meta"><b id="profileCouponCount">0 张可用</b><svg class="ic"><use href="#i-chevron"/></svg></span>
             </button>
             <button class="profile-row press" data-row="info">
               <span>个人信息</span><svg class="ic"><use href="#i-chevron"/></svg>
@@ -1082,6 +1219,65 @@
       <button class="delivery-submit press" id="deliverySubmit">提交订单</button>
     </section>
 
+    <!-- 支付选券 -->
+    <section class="sheet sheet--coupons" id="couponSheet" aria-label="选择优惠券" role="dialog" aria-modal="true">
+      <div class="sheet__grab"><i></i></div>
+      <div class="sheet__head">
+        <div>
+          <h3 id="couponSheetTitle">选择优惠券</h3>
+          <p class="sheet__sub">每单限用一张，已为你选中更优惠的方案</p>
+        </div>
+        <button class="sheet__close press" data-close-sheet aria-label="关闭选券弹层"><svg class="ic"><use href="#i-close"/></svg></button>
+      </div>
+      <div class="payment-coupon-list" id="paymentCouponList" role="radiogroup" aria-labelledby="couponSheetTitle"></div>
+      <p class="coupon-sheet-tip">优惠券仅在本单支付成功后核销，返回改单不影响券状态</p>
+    </section>
+
+    <!-- 订单退款 -->
+    <section class="sheet sheet--refund" id="refundSheet" aria-label="订单退款">
+      <div class="sheet__grab"><i></i></div>
+      <div class="sheet__head">
+        <div>
+          <h3 id="refundSheetTitle">申请退款</h3>
+          <p class="sheet__sub">提交后可在本页随时查看退款进度</p>
+        </div>
+        <button class="sheet__close press" data-close-sheet aria-label="关闭退款弹层"><svg class="ic"><use href="#i-close"/></svg></button>
+      </div>
+
+      <div class="refund-apply" id="refundApplyView">
+        <div class="refund-amount">
+          <span>退款金额</span>
+          <b id="refundAmount">¥0</b>
+          <small>全额退款 · 原路退回</small>
+        </div>
+        <fieldset class="refund-reasons" id="refundReasons">
+          <legend>请选择退款原因</legend>
+          <button type="button" class="is-active" data-refund-reason="不想要了" aria-pressed="true">不想要了</button>
+          <button type="button" data-refund-reason="门店无法接单" aria-pressed="false">门店无法接单</button>
+          <button type="button" data-refund-reason="等待时间过长" aria-pressed="false">等待时间过长</button>
+          <button type="button" data-refund-reason="其他原因" aria-pressed="false">其他原因</button>
+        </fieldset>
+        <label class="refund-note">
+          <span>退款说明 <small>选填</small></span>
+          <textarea id="refundNote" rows="3" maxlength="80" placeholder="补充说明，帮助门店更快处理"></textarea>
+        </label>
+        <p class="refund-tip">退款结果以门店审核为准，演示环境将自动完成审核。</p>
+        <button class="delivery-submit press" id="refundSubmit">确认申请退款</button>
+      </div>
+
+      <div class="refund-status" id="refundStatusView" hidden>
+        <span class="refund-status__icon"><svg class="ic"><use href="#i-clock"/></svg></span>
+        <h4 id="refundStatusTitle">退款审核中</h4>
+        <p id="refundStatusDesc">门店正在处理您的退款申请</p>
+        <dl class="refund-status__meta">
+          <div><dt>退款金额</dt><dd id="refundStatusAmount">¥0</dd></div>
+          <div><dt>退款原因</dt><dd id="refundStatusReason">—</dd></div>
+          <div><dt>退款方式</dt><dd>原路退回</dd></div>
+        </dl>
+        <button class="sheet__ghost press" data-close-sheet>知道了</button>
+      </div>
+    </section>
+
     <!-- 冲泡中 -->
     <div class="brew-layer" id="brewLayer" aria-hidden="true">
       <div class="brew">
@@ -1117,6 +1313,6 @@
   </div>
 </div>
 
-<script src="js/app.js"></script>
+<script src="js/app.js?v=20261119-coupons"></script>
 </body>
 </html>
