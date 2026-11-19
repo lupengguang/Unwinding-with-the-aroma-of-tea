@@ -39,16 +39,20 @@
         { id: 'white', name: '白茶系', desc: '雪梨陈皮白茶、寿眉纯茶套餐', price: 20, img: 'assets/白茶系.png' },
         { id: 'red', name: '红茶系', desc: '苹果热橙荒野红茶、红茶轻乳茶', price: 20, img: 'assets/红茶系.png' },
         { id: 'rock', name: '岩茶系', desc: '水仙岩茶、岩茶纯茶礼盒、寿眉纯茶套餐', price: 20, img: 'assets/岩茶系.png' },
-        { id: 'green', name: '绿茶系', desc: '龙井冷泡、云雾绿茶奶', price: 20, img: 'assets/绿茶系.png' }
+        { id: 'green', name: '绿茶系', desc: '龙井冷泡、云雾绿茶奶', price: 20, img: 'assets/绿茶系.png' },
+        { id: 'snowpear-white', name: '雪梨陈皮白茶', desc: '雪梨、陈皮、寿眉白茶，清润回甘', price: 20, img: 'assets/雪梨陈皮白茶.png' },
+        { id: 'apple-red', name: '苹果热橙红茶', desc: '苹果、热橙、荒野红茶，暖香果韵', price: 20, img: 'assets/苹果热橙红茶.png' },
+        { id: 'zhengrock-rougui', name: '正岩肉桂', desc: '武夷正岩、肉桂品种、岩骨花香', price: 28, img: 'assets/正岩肉桂.png' },
+        { id: 'mingqian-longjing', name: '明前龙井', desc: '明前嫩芽、豆香清高、鲜爽回甘', price: 22, img: 'assets/明前龙井.png' }
       ]
     },
     {
       id: 'fruit', name: '鲜果调茶',
       banner: ['鲜果入茶 · 夏日清欢', 'FRESH FRUIT TEA'],
       products: [
-        { id: 'grapefruit', name: '满杯西柚茶', desc: '红心西柚、茉莉初雪、少糖清爽', price: 22 },
-        { id: 'grape', name: '青提茉莉冷萃', desc: '阳光青提、冷萃茉莉、鲜果肉', price: 24 },
-        { id: 'pear', name: '雪梨桂花乌龙', desc: '砀山雪梨、金桂、炭焙乌龙', price: 21 }
+        { id: 'grapefruit', name: '满杯西柚茶', desc: '红心西柚、茉莉初雪、少糖清爽', price: 22, img: 'assets/满杯西柚茶.png' },
+        { id: 'grape', name: '青提茉莉冷萃', desc: '阳光青提、冷萃茉莉、鲜果肉', price: 24, img: 'assets/青提茉莉冷萃.png' },
+        { id: 'pear', name: '雪梨桂花乌龙', desc: '砀山雪梨、金桂、炭焙乌龙', price: 21, img: 'assets/雪梨桂花乌龙.png' }
       ]
     },
     {
@@ -73,9 +77,9 @@
       id: 'snack', name: '茶點小食',
       banner: ['佐茶小点 · 闲情几许', 'TEA SNACKS'],
       products: [
-        { id: 'bean', name: '绿豆糕', desc: '手作绿豆糕、清甜细腻、佐茶佳品', price: 12 },
-        { id: 'jelly', name: '桂花茶冻', desc: '桂花蜜、白茶冻、入口即化', price: 15 },
-        { id: 'cookie', name: '岩茶桃酥', desc: '岩茶粉、桃酥、酥松回甘', price: 16 }
+        { id: 'bean', name: '绿豆糕', desc: '手作绿豆糕、清甜细腻、佐茶佳品', price: 12, img: 'assets/绿豆糕.png' },
+        { id: 'jelly', name: '桂花茶冻', desc: '桂花蜜、白茶冻、入口即化', price: 15, img: 'assets/桂花茶冻.png' },
+        { id: 'cookie', name: '岩茶桃酥', desc: '岩茶粉、桃酥、酥松回甘', price: 16, img: 'assets/岩茶桃酥.png' }
       ]
     }
   ];
