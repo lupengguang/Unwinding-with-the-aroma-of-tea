@@ -16,6 +16,7 @@
     orderDetail: $('#screen-order-detail'),
     payment: $('#screen-payment'),
     coupons: $('#screen-coupons'),
+    rights: $('#screen-rights'),
     profile: $('#screen-profile'),
     login: $('#screen-login'),
     register: $('#screen-register'),
@@ -251,6 +252,8 @@
     coupons: COUPON_SEED.map(coupon => ({ ...coupon })),
     couponTab: 'all',
     couponFrom: 'profile',
+    rightsAsset: 'balance',
+    memberName: '清茶茶友',
     loggedIn: false,
     deliveryCat: 'all',
     deliveryEta: 'asap',
@@ -402,10 +405,11 @@
       if (n === 'register') return TAB_ORDER.length + 1;
       if (n === 'delivery') return TAB_ORDER.length + 2;
       if (n === 'about') return TAB_ORDER.length + 3;
-      if (n === 'coupons') return TAB_ORDER.length + 4;
-      if (n === 'product') return TAB_ORDER.length + 5;
-      if (n === 'orderDetail') return TAB_ORDER.length + 6;
-      if (n === 'payment') return TAB_ORDER.length + 7;
+      if (n === 'rights') return TAB_ORDER.length + 4;
+      if (n === 'coupons') return TAB_ORDER.length + 5;
+      if (n === 'product') return TAB_ORDER.length + 6;
+      if (n === 'orderDetail') return TAB_ORDER.length + 7;
+      if (n === 'payment') return TAB_ORDER.length + 8;
       const i = TAB_ORDER.indexOf(n);
       return i === -1 ? 0 : i;
     };
@@ -476,7 +480,7 @@
       try { inAnim.cancel(); } catch (e) {}
     };
 
-    if (name === 'login' || name === 'register' || name === 'delivery' || name === 'about' || name === 'product' || name === 'orderDetail' || name === 'payment' || name === 'coupons') {
+    if (name === 'login' || name === 'register' || name === 'delivery' || name === 'about' || name === 'product' || name === 'orderDetail' || name === 'payment' || name === 'coupons' || name === 'rights') {
       const sc = $(`[data-scroll="${name}"]`);
       if (sc) sc.scrollTop = 0;
       if (name === 'login' || name === 'register') {
@@ -497,6 +501,7 @@
     if (name === 'menu') {
       setTimeout(updateCartUI, 60);
     }
+    if (name === 'rights') renderRightsAsset();
   }
 
   function leaveSplash() {
@@ -528,7 +533,7 @@
 
   function updateTabs() {
     $$('#tabbar .tab[data-nav]').forEach(btn => {
-      const activeView = current === 'orderDetail' ? 'orders' : current === 'payment' ? 'menu' : current === 'coupons' ? 'profile' : current;
+      const activeView = current === 'orderDetail' ? 'orders' : current === 'payment' ? 'menu' : ['coupons', 'rights'].includes(current) ? 'profile' : current;
       btn.classList.toggle('is-active', btn.dataset.nav === activeView);
     });
   }
@@ -1679,6 +1684,7 @@
     const count = state.coupons.filter(coupon => coupon.status === 'available').length;
     $('#couponAvailableCount').textContent = count;
     $('#profileCouponCount').textContent = `${count} 张可用`;
+    $('#rightsCouponCount').textContent = count;
     $$('[data-stat="coupon"], [data-home-stat="coupon"]').forEach(el => {
       el.textContent = count;
     });
@@ -1728,6 +1734,62 @@
     renderCoupons();
     go('coupons');
   }
+  function renderRightsAsset(type = state.rightsAsset) {
+    const assetTypes = ['balance', 'coupons', 'points'];
+    state.rightsAsset = assetTypes.includes(type) ? type : 'balance';
+    $('#rightsNickname').textContent = state.memberName;
+    $$('[data-rights-asset]', $('#rightsAssets')).forEach(btn => {
+      const active = btn.dataset.rightsAsset === state.rightsAsset;
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
+
+    const titles = { balance: '余额明细', coupons: '可用优惠券', points: '积分明细' };
+    $('#rightsAssetTitle').textContent = titles[state.rightsAsset];
+    $('#rightsOpenCoupons').hidden = state.rightsAsset !== 'coupons';
+    const list = $('#rightsAssetList');
+
+    if (state.rightsAsset === 'coupons') {
+      const available = state.coupons.filter(coupon => coupon.status === 'available');
+      list.innerHTML = available.length ? available.map(coupon => {
+        const value = coupon.kind === 'discount'
+          ? `${formatMoney(coupon.value / 10)} 折`
+          : `¥${formatMoney(fromCents(coupon.value))}`;
+        return `
+          <article class="rights-asset-record rights-coupon-record">
+            <span class="rights-coupon-record__value">${value}</span>
+            <div><h4>${escapeHtml(coupon.name)}</h4><p>${couponRuleText(coupon)} · ${couponScopeLabel(coupon)}</p><small>有效期至 ${coupon.expiry}</small></div>
+          </article>`;
+      }).join('') : '<div class="rights-asset-empty"><svg class="ic"><use href="#i-ticket"/></svg><p>暂无可用优惠券，去券中心领取好茶礼券</p></div>';
+      return;
+    }
+
+    const records = {
+      balance: [
+        { title: '账户充值', meta: '2026.11.18 · 微信支付', amount: '+¥100.00', icon: 'i-card' },
+        { title: '会员储值赠额', meta: '2026.11.18 · 开卡礼遇', amount: '+¥28.00', icon: 'i-gift' },
+        { title: '秋日茶单支付', meta: '2026.11.08 · 门店消费', amount: '-¥20.00', icon: 'i-receipt' }
+      ],
+      points: [
+        { title: '订单消费奖励', meta: '2026.11.18 · 清茶订单', amount: '+26', icon: 'i-receipt' },
+        { title: '完成订单评价', meta: '2026.11.16 · 有效评价', amount: '+20', icon: 'i-star' },
+        { title: '每日签到', meta: '2026.11.15 · 连续签到', amount: '+5', icon: 'i-check' },
+        { title: '积分抵现', meta: '2026.11.12 · 订单抵扣', amount: '-100', icon: 'i-ticket' }
+      ]
+    };
+    list.innerHTML = records[state.rightsAsset].map(record => `
+      <article class="rights-asset-record">
+        <span class="rights-asset-record__icon"><svg class="ic"><use href="#${record.icon}"/></svg></span>
+        <div><h4>${record.title}</h4><p>${record.meta}</p></div>
+        <strong class="${record.amount.startsWith('+') ? 'is-plus' : ''}">${record.amount}</strong>
+      </article>`).join('');
+  }
+  function openRights() {
+    closeSheets();
+    renderRightsAsset();
+    go('rights');
+  }
+
   function claimCoupon(id) {
     const coupon = state.coupons.find(item => item.id === id);
     if (!coupon || coupon.status !== 'claimable') return;
@@ -2025,6 +2087,8 @@
   function applyLoginState(name) {
     state.loggedIn = true;
     const displayName = (name || '').trim() || '青瓷会员';
+    state.memberName = displayName;
+    $('#rightsNickname').textContent = displayName;
     greetingLine.innerHTML = `Hi，<em>${escapeHtml(displayName)}</em>，歡迎你`;
     loginTip.textContent = '本月已品 6 盏好茶 · 会员日每月 8 号';
     loginBtn.textContent = '会员码';
@@ -2606,6 +2670,15 @@
     });
     $('#refundSubmit').addEventListener('click', applyRefund);
 
+    // 用户权益
+    $('#rightsBack').addEventListener('click', () => go('profile'));
+    $('#vipRightsEntry').addEventListener('click', openRights);
+    $('#rightsAssets').addEventListener('click', e => {
+      const btn = e.target.closest('[data-rights-asset]');
+      if (btn) renderRightsAsset(btn.dataset.rightsAsset);
+    });
+    $('#rightsOpenCoupons').addEventListener('click', () => openCoupons('rights'));
+
     // 我的
     loginBtn.addEventListener('click', login);
     $('#memberCodeBtn').addEventListener('click', () => openSheet('member'));
@@ -2620,11 +2693,14 @@
           openCoupons('profile');
           return;
         }
+        if (key === 'rights') {
+          openRights();
+          return;
+        }
         const messages = {
           info: '个人信息 · 即将开放',
           service: '茶艺师在线，请稍候',
           address: '暂未设置常用地址',
-          rights: '青瓷会员权益：生日茶礼 · 双倍积分 · 优先取茶',
           account: '账号与安全 · 即将开放'
         };
         toast(messages[key] || '敬请期待');
@@ -2765,6 +2841,7 @@
     renderProducts();
     renderOrders();
     renderCoupons();
+    renderRightsAsset();
     updateModeUI();
     syncStoreHeader();
     updateTabs();

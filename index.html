@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;900&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261119-coupons">
+<link rel="stylesheet" href="css/style.css?v=20261119-rights">
 </head>
 <body>
 
@@ -93,6 +93,10 @@
   </symbol>
   <symbol id="i-clock" viewBox="0 0 24 24">
     <circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3 1.8"/>
+  </symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24">
+    <path d="M4 10h16v10H4zM3 6.8h18V10H3zM12 6.8V20"/>
+    <path d="M12 6.8H8.6a2.4 2.4 0 1 1 2.1-3.6C11.8 4.4 12 6.8 12 6.8ZM12 6.8h3.4a2.4 2.4 0 1 0-2.1-3.6C12.2 4.4 12 6.8 12 6.8Z"/>
   </symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="m5.4 12.4 4.4 4.4 8.8-9.2"/></symbol>
   <symbol id="i-scan" viewBox="0 0 24 24">
@@ -800,7 +804,7 @@
             </div>
             <div class="vip-card__foot">
               <span>暂未开通此VIP特权</span>
-              <button class="vip-card__link press" data-toast="青瓷会员权益：生日茶礼 · 双倍积分 · 优先取茶">权益详情
+              <button class="vip-card__link press" id="vipRightsEntry">权益详情
                 <svg class="ic"><use href="#i-chevron"/></svg>
               </button>
             </div>
@@ -832,6 +836,146 @@
           </section>
 
           <p class="profile-version">解 茶 香 · J I E C H A · V 1 . 0</p>
+        </div>
+      </section>
+
+      <!-- ================= 用户权益 ================= -->
+      <section class="screen screen--order-detail screen--rights" id="screen-rights" data-screen="rights" aria-label="用户权益">
+        <header class="order-detail-head">
+          <button class="auth-back press" id="rightsBack" aria-label="返回个人中心">
+            <svg class="ic"><use href="#i-chevron"/></svg>
+          </button>
+          <div class="order-detail-head__title">
+            <h2>用户权益</h2>
+            <p>MEMBER PRIVILEGES</p>
+          </div>
+          <button class="mini-capsule press" data-capsule aria-label="小程序菜单">
+            <span class="capsule-dots"><i></i><i></i><i></i></span>
+            <span class="capsule-line"></span>
+            <span class="capsule-ring"></span>
+          </button>
+        </header>
+
+        <div class="order-detail-scroll rights-scroll" data-scroll="rights">
+          <section class="rights-identity" aria-labelledby="rightsIdentityTitle">
+            <div class="rights-identity__top">
+              <span class="rights-avatar"><img src="assets/logo-mark.png" alt="解茶香会员头像"></span>
+              <div class="rights-identity__name">
+                <small>JIE CHA XIANG MEMBER</small>
+                <h2 id="rightsIdentityTitle"><span id="rightsNickname">清茶茶友</span><em>青瓷会员</em></h2>
+                <p>有效期至 2027.12.31</p>
+              </div>
+              <span class="rights-level">LV.1</span>
+            </div>
+            <div class="rights-growth">
+              <div><span>当前成长值</span><b><strong id="rightsGrowthValue">520</strong> / 1000</b></div>
+              <div class="rights-growth__track" id="rightsGrowthBar" role="progressbar" aria-label="会员成长值" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="520"><span></span></div>
+              <p>再积累 480 成长值，解锁下一级会员礼遇</p>
+            </div>
+          </section>
+
+          <section class="rights-assets" id="rightsAssets" aria-label="我的资产">
+            <button class="rights-asset is-active" data-rights-asset="balance" aria-pressed="true">
+              <span>余额</span><strong><small>¥</small><b id="rightsBalance">128.00</b></strong><em>点击查看明细</em>
+            </button>
+            <button class="rights-asset" data-rights-asset="coupons" aria-pressed="false">
+              <span>优惠券</span><strong><b id="rightsCouponCount">0</b><small>张</small></strong><em>当前可使用</em>
+            </button>
+            <button class="rights-asset" data-rights-asset="points" aria-pressed="false">
+              <span>积分</span><strong><b id="rightsPoints">520</b><small>分</small></strong><em>约可兑 ¥5.20</em>
+            </button>
+          </section>
+
+          <section class="rights-asset-panel" id="rightsAssetPanel" aria-labelledby="rightsAssetTitle">
+            <div class="rights-asset-panel__head">
+              <div><small>MY ASSETS</small><h3 id="rightsAssetTitle">余额明细</h3></div>
+              <button class="press" id="rightsOpenCoupons" hidden>进入券中心<svg class="ic"><use href="#i-chevron"/></svg></button>
+            </div>
+            <div class="rights-asset-list" id="rightsAssetList" aria-live="polite"></div>
+          </section>
+
+          <section class="rights-section" aria-labelledby="rightsBenefitsTitle">
+            <div class="rights-section__head">
+              <div><small>MEMBER BENEFITS</small><h2 id="rightsBenefitsTitle">权益宫格</h2></div>
+              <span>10 项会员礼遇</span>
+            </div>
+            <div class="rights-benefits">
+              <article class="rights-benefit is-used">
+                <div><span class="rights-benefit__icon"><svg class="ic"><use href="#i-ticket"/></svg></span><em>已使用</em></div>
+                <h3>开卡礼</h3><p>新会员 3 张券（满 20 减 5 / 免配送 / 茶点券）</p>
+              </article>
+              <article class="rights-benefit is-active">
+                <div><span class="rights-benefit__icon"><svg class="ic"><use href="#i-star"/></svg></span><em>已开通</em></div>
+                <h3>积分抵现</h3><p>100 积分抵 ¥1，单笔最多抵 20%</p>
+              </article>
+              <article class="rights-benefit is-locked">
+                <div><span class="rights-benefit__icon"><svg class="ic"><use href="#i-gift"/></svg></span><em>未达标</em></div>
+                <h3>生日礼</h3><p>生日当月一杯中杯纯茶 + 一块绿豆糕</p>
+              </article>
+              <article class="rights-benefit is-active">
+                <div><span class="rights-benefit__icon"><svg class="ic"><use href="#i-bag"/></svg></span><em>已开通</em></div>
+                <h3>免配送费</h3><p>满 ¥39 免配送，会员无门槛</p>
+              </article>
+              <article class="rights-benefit is-active">
+                <div><span class="rights-benefit__icon"><svg class="ic"><use href="#i-clock"/></svg></span><em>已开通</em></div>
+                <h3>会员日</h3><p>每月 8 日第二杯半价</p>
+              </article>
+              <article class="rights-benefit is-active">
+                <div><span class="rights-benefit__icon"><svg class="ic"><use href="#i-star"/></svg></span><em>已开通</em></div>
+                <h3>双倍积分</h3><p>每周三消费双倍成长值</p>
+              </article>
+              <article class="rights-benefit is-locked">
+                <div><span class="rights-benefit__icon"><svg class="ic"><use href="#i-teapot"/></svg></span><em>未达标</em></div>
+                <h3>新品试饮</h3><p>每季 1 次新品小杯免费</p>
+              </article>
+              <article class="rights-benefit is-locked">
+                <div><span class="rights-benefit__icon"><svg class="ic"><use href="#i-gift"/></svg></span><em>未达标</em></div>
+                <h3>茶点赠品</h3><p>单笔满 ¥58 赠茶点一份</p>
+              </article>
+              <article class="rights-benefit is-active">
+                <div><span class="rights-benefit__icon"><svg class="ic"><use href="#i-headset"/></svg></span><em>已开通</em></div>
+                <h3>专属客服</h3><p>优先接单、可改糖度</p>
+              </article>
+              <article class="rights-benefit is-locked">
+                <div><span class="rights-benefit__icon"><svg class="ic"><use href="#i-user"/></svg></span><em>未达标</em></div>
+                <h3>包厢 / 团体</h3><p>6 杯以上优先出杯、可预约</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="rights-section" aria-labelledby="rightsTasksTitle">
+            <div class="rights-section__head">
+              <div><small>GROWTH TASKS</small><h2 id="rightsTasksTitle">成长任务</h2></div>
+              <span>轻松积累成长值</span>
+            </div>
+            <div class="rights-tasks">
+              <div class="rights-task"><span>01</span><div><h3>消费有礼</h3><p>每消费 ¥1 获得 1 点成长值</p></div><b>+1 / 元</b></div>
+              <div class="rights-task"><span>02</span><div><h3>评价订单</h3><p>完成一次有效订单评价</p></div><b>+20</b></div>
+              <div class="rights-task"><span>03</span><div><h3>每日签到</h3><p>每日签到，连续签到另有奖励</p></div><b>+5</b></div>
+              <div class="rights-task"><span>04</span><div><h3>分享好茶</h3><p>将解茶香小程序分享给好友</p></div><b>+10</b></div>
+            </div>
+          </section>
+
+          <section class="rights-section" aria-labelledby="rightsExclusiveTitle">
+            <div class="rights-section__head">
+              <div><small>MEMBER EXCLUSIVE</small><h2 id="rightsExclusiveTitle">会员专享</h2></div>
+            </div>
+            <div class="rights-exclusives">
+              <article><small>每月 8 日</small><h3>会员日</h3><p>第二杯半价，与好友共享一杯清茶</p></article>
+              <article><small>每季 1 次</small><h3>新品试饮</h3><p>当季新品小杯免费，先尝一口新茶香</p></article>
+              <article><small>生日当月</small><h3>生日礼</h3><p>一杯中杯纯茶 + 一块绿豆糕</p></article>
+            </div>
+          </section>
+
+          <details class="rights-rules">
+            <summary><span><small>MEMBERSHIP RULES</small><b>规则说明</b></span><svg class="ic"><use href="#i-chevron-down"/></svg></summary>
+            <div class="rights-rules__content">
+              <h3>等级如何升降</h3><p>会员等级按近 12 个月累计成长值评定，达到对应门槛后自动升级。等级有效期为一年，到期时按当前有效成长值重新评定。</p>
+              <h3>成长值有效期</h3><p>成长值自获得之日起 12 个月内有效，到期自动扣减；退款订单对应的成长值与积分将同步退回。</p>
+              <h3>权益变更说明</h3><p>权益可能随季节、门店与活动调整，变更将提前在页面公示。具体使用条件以优惠券、活动页面及门店说明为准。</p>
+            </div>
+          </details>
+          <p class="rights-footer">清茶有期 · 礼遇常伴<br>JIE CHA XIANG MEMBERSHIP</p>
         </div>
       </section>
 
@@ -1313,6 +1457,6 @@
   </div>
 </div>
 
-<script src="js/app.js?v=20261119-coupons"></script>
+<script src="js/app.js?v=20261119-rights"></script>
 </body>
 </html>
